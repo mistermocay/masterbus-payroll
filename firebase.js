@@ -1,10 +1,11 @@
-// Firebase SDK
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+
 import {
-    getFirestore
+    getFirestore,
+    collection,
+    addDoc
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
-// Konfigurasi Firebase
 const firebaseConfig = {
     apiKey: "AIzaSyCy5Cg24RpnfXRYnMIC8s_p4AgDGK0M55Y",
     authDomain: "master-bus-payroll.firebaseapp.com",
@@ -15,11 +16,22 @@ const firebaseConfig = {
     measurementId: "G-Q34GP1R77T"
 };
 
-// Inisialisasi Firebase
 const app = initializeApp(firebaseConfig);
 
-// Inisialisasi Firestore
 const db = getFirestore(app);
 
-// Supaya bisa dipakai file lain
-export { db };
+// TEST
+window.testFirebase = async function () {
+
+    await addDoc(collection(db, "employees"), {
+
+        nama: "Test Firebase",
+        bagian: "ADMIN",
+        gaji: 4000000,
+        waktu: new Date()
+
+    });
+
+    alert("Data berhasil dikirim ke Firebase!");
+
+}
