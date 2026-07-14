@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>APLIKASI PAYROLL — PT MASTER ARTHA KHARISMA (DIVISI BUS)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F2F6FF;
+    --surface:#FFFFFF;
+    --ink:#1B2420;
+    --ink-soft:#5B6A62;
+    --line:#C9D8F0;
+    --line-soft:#EAF2FF;
+    --teal:#1656B8;
+    --teal-dim:#E4EEFF;
+    --amber:#E0B84A;
+    --amber-dim:#FBEBD2;
+    --red:#C0392B;
+    --red-dim:#F5DFD9;
+    --radius:10px;
+    --shadow: 0 1px 2px rgba(27,36,32,.06), 0 6px 16px rgba(27,36,32,.05);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif;
+    font-size:14px;
+    line-height:1.45;
+  }
+  h1,h2,h3,.display{font-family:'Space Grotesk',sans-serif;}
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  button{font-family:inherit;cursor:pointer;}
+  input,select{font-family:inherit;}
+
+  /* ---------- shell ---------- */
+  #app{max-width:1320px;margin:0 auto;padding:0 20px 60px;}
+  header.topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:22px 0 16px;gap:16px;flex-wrap:wrap;
+  }
+  .brand{display:flex;align-items:center;gap:12px;}
+  .brand-mark{
+    width:40px;height:40px;border-radius:8px;background:var(--teal);
+    color:#fff;display:flex;align-items:center;justify-content:center;
+    font-family:'Space Grotesk';font-weight:700;font-size:15px;flex-shrink:0;
+    box-shadow:var(--shadow);
+  }
+  .brand-text h1{font-size:18px;margin:0;font-weight:700;letter-spacing:-.01em;}
+  .brand-text p{margin:1px 0 0;font-size:12px;color:var(--ink-soft);}
+
+  .period-picker{display:flex;align-items:center;gap:8px;background:var(--surface);
+    border:1px solid var(--line);border-radius:8px;padding:6px 8px;box-shadow:var(--shadow);}
+  .period-picker label{font-size:11px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;padding-left:4px;}
+  .period-picker select{border:none;background:transparent;font-weight:600;font-size:13.5px;color:var(--ink);padding:4px 2px;}
+  .period-picker select:focus{outline:none;}
+
+  nav.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:22px;flex-wrap:wrap;}
+  nav.tabs button{
+    background:none;border:none;padding:10px 14px;font-size:13.5px;font-weight:600;
+    color:var(--ink-soft);border-bottom:2px solid transparent;margin-bottom:-1px;
+    transition:color .15s, border-color .15s;
+  }
+  nav.tabs button:hover{color:var(--ink);}
+  nav.tabs button.active{color:var(--teal);border-bottom-color:var(--teal);}
+
+  .panel{display:none;}
+  .panel.active{display:block;animation:fade .18s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(2px);}to{opacity:1;transform:none;}}
+
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);}
+  .card-pad{padding:20px;}
+  .row-between{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+  .section-title{font-size:16px;font-weight:700;margin:0 0 2px;}
+  .section-sub{font-size:12.5px;color:var(--ink-soft);margin:0 0 16px;}
+
+  .btn{
+    display:inline-flex;align-items:center;gap:6px;border-radius:7px;border:1px solid var(--line);
+    background:var(--surface);color:var(--ink);padding:8px 14px;font-size:13px;font-weight:600;
+    transition:background .15s,border-color .15s;
+  }
+  .btn:hover{background:var(--line-soft);}
+  .btn-primary{background:var(--teal);border-color:var(--teal);color:#fff;}
+  .btn-primary:hover{background:#11479a;}
+  .btn-ghost{border-color:transparent;background:transparent;}
+  .btn-ghost:hover{background:var(--line-soft);}
+  .btn-danger{color:var(--red);}
+  .btn-sm{padding:5px 10px;font-size:12px;}
+  .btn-icon{width:30px;height:30px;padding:0;justify-content:center;}
+
+  table{border-collapse:collapse;width:100%;}
+  .tbl-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--line);}
+  .tbl{background:var(--surface);}
+  .tbl th{
+    text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.04em;
+    color:var(--ink-soft);background:var(--teal-dim);padding:10px 12px;border-bottom:1px solid var(--line);
+    white-space:nowrap;position:sticky;top:0;
+  }
+  .tbl td{padding:9px 12px;border-bottom:1px solid var(--line-soft);font-size:13px;white-space:nowrap;}
+  .tbl tr:last-child td{border-bottom:none;}
+  .tbl tr:hover td{background:#FAFAF7;}
+  .num{text-align:right;font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;}
+  .tag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;background:var(--teal-dim);color:var(--teal);}
+
+  /* forms */
+  .field{margin-bottom:13px;}
+  .field label{display:block;font-size:12px;font-weight:600;color:var(--ink-soft);margin-bottom:5px;}
+  .field input,.field select{
+    width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:7px;font-size:13.5px;
+    background:#fff;color:var(--ink);
+  }
+  .field input:focus,.field select:focus{outline:2px solid var(--teal);outline-offset:-1px;}
+  .field-hint{font-size:11px;color:var(--ink-soft);margin-top:4px;}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:0 14px;}
+
+  .modal-backdrop{
+    position:fixed;inset:0;background:rgba(20,26,23,.45);display:none;align-items:flex-start;justify-content:center;
+    padding:40px 16px;z-index:50;overflow-y:auto;
+  }
+  .modal-backdrop.open{display:flex;}
+  .modal{background:#fff;border-radius:14px;max-width:480px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.25);}
+  .modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--line-soft);}
+  .modal-head h3{margin:0;font-size:16px;}
+  .modal-body{padding:20px;max-height:65vh;overflow-y:auto;}
+  .modal-foot{padding:14px 20px;border-top:1px solid var(--line-soft);display:flex;justify-content:flex-end;gap:8px;}
+
+  .empty-state{padding:50px 20px;text-align:center;color:var(--ink-soft);}
+  .empty-state .em-ic{font-size:30px;margin-bottom:8px;}
+
+  /* segmented control */
+  .segmented{display:inline-flex;background:var(--line-soft);padding:3px;border-radius:8px;gap:2px;}
+  .segmented button{border:none;background:none;padding:7px 13px;border-radius:6px;font-size:12.5px;font-weight:600;color:var(--ink-soft);}
+  .segmented button.active{background:#fff;color:var(--teal);box-shadow:0 1px 3px rgba(0,0,0,.12);}
+
+  /* attendance grid */
+  .att-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius);background:#fff;}
+  table.att{border-collapse:collapse;font-size:12px;}
+  table.att th, table.att td{border:1px solid var(--line-soft);text-align:center;padding:0;}
+  table.att th.name-col, table.att td.name-col{
+    position:sticky;left:0;background:var(--surface);text-align:left;padding:7px 10px;
+    font-size:12.5px;font-weight:600;white-space:nowrap;z-index:2;border-right:1px solid var(--line);min-width:170px;
+  }
+  table.att th{background:var(--teal-dim);padding:6px 2px;font-weight:600;color:var(--ink-soft);}
+  table.att th.name-col{background:var(--teal-dim);z-index:3;}
+  table.att th .dow{display:block;font-size:9px;font-weight:500;opacity:.75;}
+  table.att th.sunday, table.att td.sunday{background:var(--red-dim);}
+  table.att th.friday{background:var(--amber-dim);}
+  table.att td select, table.att td input{
+    width:46px;border:none;background:transparent;text-align:center;font-size:11.5px;padding:7px 0;
+    font-family:'IBM Plex Mono',monospace;color:var(--ink);
+  }
+  table.att td input{width:38px;}
+  table.att td select:focus, table.att td input:focus{outline:2px solid var(--teal);outline-offset:-2px;background:#fff;}
+  table.att td.code-T select{color:var(--amber);font-weight:700;}
+  table.att td.code-A select{color:var(--red);font-weight:700;}
+  table.att td.code-SH select, table.att td.code-SD select, table.att td.code-DL select, table.att td.code-CT select{color:var(--teal);font-weight:700;}
+
+  .legend{display:flex;flex-wrap:wrap;gap:10px 18px;font-size:11.5px;color:var(--ink-soft);margin-top:12px;}
+  .legend span b{color:var(--ink);}
+
+  /* slip */
+  .slip-controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:18px;}
+  .slip-select{padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;font-size:13.5px;font-weight:600;min-width:240px;}
+
+  .slip{
+    max-width:480px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:14px;
+    box-shadow:var(--shadow);position:relative;overflow:hidden;
+  }
+  .slip::before{
+    content:"";position:absolute;top:0;left:0;right:0;height:5px;
+    background:repeating-linear-gradient(90deg,var(--amber) 0 10px, transparent 10px 18px);
+  }
+  .slip-head{padding:22px 24px 16px;border-bottom:1px dashed var(--line);}
+  .slip-badge{display:inline-flex;align-items:center;gap:6px;background:var(--teal);color:#fff;font-size:10.5px;
+    font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;border-radius:20px;margin-bottom:10px;}
+  .slip-head h2{margin:0 0 3px;font-size:19px;}
+  .slip-head .meta{font-size:12.5px;color:var(--ink-soft);}
+  .slip-head .bagian{margin-top:8px;font-size:12px;color:var(--teal);font-weight:700;}
+  .slip-body{padding:16px 24px;}
+  .slip-line{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line-soft);font-size:13.5px;}
+  .slip-line.sub{color:var(--ink-soft);font-size:12px;padding:5px 0;border-bottom:none;}
+  .slip-line .lbl{display:flex;flex-direction:column;}
+  .slip-line .lbl small{color:var(--ink-soft);font-size:10.5px;margin-top:1px;}
+  .slip-line .val{font-family:'IBM Plex Mono',monospace;font-weight:600;white-space:nowrap;}
+  .val.neg{color:var(--red);}
+  .val.pos{color:var(--teal);}
+  .slip-total{
+    display:flex;justify-content:space-between;align-items:center;margin:14px 24px 20px;
+    background:var(--teal);color:#fff;border-radius:10px;padding:14px 18px;
+  }
+  .slip-total .lbl{font-size:12px;letter-spacing:.04em;text-transform:uppercase;opacity:.85;}
+  .slip-total .val{font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:700;}
+  .slip-sign{display:flex;justify-content:space-between;padding:0 24px 24px;font-size:12px;color:var(--ink-soft);gap:10px;}
+  .slip-sign div{flex:1;text-align:center;}
+  .slip-sign .line{margin-top:34px;border-top:1px solid var(--line);padding-top:5px;font-weight:600;color:var(--ink);}
+  .slip-actions{display:flex;justify-content:center;gap:10px;margin-top:18px;}
+  .period-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;justify-content:center;}
+  .period-tabs button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 14px;font-size:12.5px;font-weight:600;color:var(--ink-soft);}
+  .period-tabs button.active{background:var(--amber);border-color:var(--amber);color:#fff;}
+  .period-range{font-size:11px;color:var(--ink-soft);}
+
+  /* rekap */
+  .kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px;}
+  .kpi{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);}
+  .kpi .kpi-label{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);margin-bottom:6px;}
+  .kpi .kpi-val{font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:700;}
+
+  .toast{
+    position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:var(--ink);color:#fff;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:600;
+    opacity:0;pointer-events:none;transition:all .25s ease;z-index:100;box-shadow:0 8px 24px rgba(0,0,0,.25);
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  @media print{
+    body *{visibility:hidden;}
+    #print-area, #print-area *{visibility:visible;}
+    #print-area{position:absolute;top:0;left:0;width:100%;padding:20px;}
+    .slip-actions{display:none;}
+  }
+  @media (max-width:640px){
+    .grid-2{grid-template-columns:1fr;}
+    header.topbar{flex-direction:column;align-items:flex-start;}
+  }
+
+#print-area{display:none;}
+@media print{
+  #print-area{display:block;}
+}
+
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">BUS</div>
+      <div class="brand-text">
+        <h1>APLIKASI PAYROLL — PT MASTER ARTHA KHARISMA (DIVISI BUS)</h1>
+        <p>Absensi, uang makan, lembur &amp; slip gaji otomatis</p>
+      </div>
+    </div>
+    <div class="period-picker">
+      <label>Periode</label>
+      <select id="selMonth"></select>
+      <select id="selYear"></select>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button data-tab="karyawan" class="active">Karyawan</button>
+    <button data-tab="absensi">Absensi</button>
+    <button data-tab="slipBulanan">Slip Gaji Bulanan</button>
+    <button data-tab="slipUM">Slip Uang Makan + Lembur</button>
+    <button data-tab="rekapUM">Rekapan Mingguan</button>
+    <button data-tab="rekap">Rekap</button>
+    <button data-tab="readme">Aturan</button>
+  </nav>
+
+  <!-- KARYAWAN -->
+  <section class="panel active" id="panel-karyawan">
+    <div class="row-between" style="margin-bottom:16px;">
+      <div>
+        <h2 class="section-title">Data Karyawan</h2>
+        <p class="section-sub">Master data — jadi acuan perhitungan seluruh slip gaji.</p>
+      </div>
+      <button class="btn btn-primary" id="btnAddEmp">+ Tambah Karyawan</button>
+    </div>
+    <div class="tbl-wrap card">
+      <table class="tbl" id="tblEmp">
+        <thead><tr>
+          <th>Nama</th><th>Bagian</th><th>Bank / Rekening</th>
+          <th>Gaji Pokok</th><th>BPJS</th><th>UM/hari</th><th>Lembur/jam</th><th></th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ABSENSI -->
+  <section class="panel" id="panel-absensi">
+    <div class="row-between" style="margin-bottom:14px;">
+      <div>
+        <h2 class="section-title">Absensi <span id="absMonthLabel"></span></h2>
+        <p class="section-sub">Klik sel untuk isi kode kehadiran atau jam lembur per hari.</p>
+      </div>
+      <div class="segmented" id="segAbsMode">
+        <button data-mode="kehadiran" class="active">Kehadiran</button>
+        <button data-mode="lb">Lembur Biasa</button>
+        <button data-mode="lm">Lembur Tgl Merah</button>
+      </div>
+    </div>
+    <div class="att-wrap"><div id="attGridWrap"></div></div>
+    <div class="legend" id="attLegend"></div>
+  </section>
+
+  <!-- SLIP BULANAN -->
+  <section class="panel" id="panel-slipBulanan">
+    <div class="slip-controls">
+      <select class="slip-select" id="selEmpBulanan"></select>
+      <button class="btn" id="btnPrintBulanan">🖨 Cetak</button>
+    </div>
+    <div id="slipBulananWrap"></div>
+  </section>
+
+  <!-- SLIP UM+LEMBUR -->
+  <section class="panel" id="panel-slipUM">
+    <div class="slip-controls">
+      <select class="slip-select" id="selEmpUM"></select>
+      <button class="btn" id="btnPrintUM">🖨 Cetak</button>
+    </div>
+    <div class="period-tabs" id="periodTabs"></div>
+    <div id="slipUMWrap"></div>
+  </section>
+
+
+  <!-- REKAP UM -->
+  <section class="panel" id="panel-rekapUM">
+    <div class="row-between" style="margin-bottom:16px;">
+      <div>
+        <h2 class="section-title">Rekap UM & Lembur Mingguan</h2>
+        <p class="section-sub">Rekap setor payroll mingguan.</p>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;"><select id="weeklyPeriodSelect" class="slip-select" style="min-width:180px"></select><button class="btn" id="btnPrintRekapUM">🖨 Cetak Rekapan</button></div>
+    </div>
+    <div class="tbl-wrap card">
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>Nama</th><th>Bagian</th><th>Jumlah Hari Uang Makan</th><th>Jumlah Jam Lembur</th><th>Jumlah Jam Lembur Hari Libur</th>
+            <th>Uang Makan</th><th>Lembur</th><th>Lembur Hari Libur</th><th>Total</th>
+          </tr>
+        </thead>
+        <tbody id="weeklyRekapBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+
+  <!-- REKAP -->
+  <section class="panel" id="panel-rekap">
+    <h2 class="section-title" style="margin-bottom:2px;">Rekap Payroll <span id="rekapMonthLabel"></span></h2>
+    <div class="row-between"><p class="section-sub">Ringkasan seluruh karyawan untuk periode terpilih.</p><button class="btn" id="btnPrintRekap">🖨 Cetak Rekapan</button></div>
+    <div class="kpi-row" id="kpiRow"></div>
+    <div class="tbl-wrap card">
+      <table class="tbl" id="tblRekap">
+        <thead><tr>
+          <th>Nama</th><th>Bagian</th><th class="num">Gaji Pokok</th><th class="num">Potongan</th>
+          <th class="num">Uang Makan</th><th class="num">Lembur</th><th class="num">Take Home</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- README -->
+  <section class="panel" id="panel-readme">
+    <div class="card card-pad">
+      <h2 class="section-title">Business Rules</h2>
+      <p class="section-sub">Aturan ini yang dipakai sistem untuk menghitung gaji secara otomatis.</p>
+      <table class="tbl" style="border:1px solid var(--line-soft);border-radius:8px;overflow:hidden;">
+        <tbody id="ruleList"></tbody>
+      </table>
+    </div>
+  </section>
+
+</div>
+
+<div id="print-area"></div>
+
+<!-- Modal tambah/edit karyawan -->
+<div class="modal-backdrop" id="empModalBackdrop">
+  <div class="modal">
+    <div class="modal-head"><h3 id="empModalTitle">Tambah Karyawan</h3>
+      <button class="btn btn-icon btn-ghost" id="empModalClose">✕</button></div>
+    <div class="modal-body">
+      <div class="field"><label>Nama Lengkap</label><input id="fNama" placeholder="cth. Budi Santoso"></div>
+      <div class="field"><label>Bagian / Divisi</label><input id="fBagian" placeholder="cth. FINISHING"></div>
+      <div class="grid-2">
+        <div class="field"><label>Bank</label><input id="fBank" placeholder="Maybank"></div>
+        <div class="field"><label>No. Rekening</label><input id="fRek" placeholder="8.746.935.140"></div>
+      </div>
+      <div class="grid-2">
+        <div class="field"><label>Gaji Pokok (Rp/bulan)</label><input id="fGaji" type="number" min="0" step="1000"></div>
+        <div class="field"><label>Potongan BPJS (Rp)</label><input id="fBpjs" type="number" min="0" step="500"></div>
+      </div>
+      <div class="grid-2">
+        <div class="field"><label>Uang Makan (Rp/hari)</label><input id="fUM" type="number" min="0" step="500"></div>
+        <div class="field"><label>Lembur Hari Biasa (Rp/jam)</label><input id="fLB" type="number" min="0" step="500"></div>
+      </div>
+      <div class="field"><label>Potongan Terlambat (Rp/kejadian)</label><input id="fTerlambat" type="number" min="0" step="500">
+        <div class="field-hint">Default aturan: Rp10.000/kejadian.</div>
+      </div>
+      <div class="field-hint" id="lemburMerahPreview" style="background:var(--teal-dim);padding:8px 10px;border-radius:7px;"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" id="empModalCancel">Batal</button>
+      <button class="btn btn-primary" id="empModalSave">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================= STATE ============================= */
+const BULAN_ID = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+const DOW_ID = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+const KODE_LIST = [
+  {v:'', label:'Hadir'},
+  {v:'T', label:'T — Terlambat'},
+  {v:'SH', label:'SH — Setengah Hari'},
+  {v:'A', label:'A — Alpha'},
+  {v:'SD', label:'SD — Surat Dokter'},
+  {v:'DL', label:'DL — Dinas Luar'},
+  {v:'CT', label:'CT — Cuti'},
+];
+const RULES = [
+ "Hari kerja: Senin–Sabtu. Minggu libur.",
+ "Closing payroll dilakukan setiap hari Jumat.",
+ "Periode UM/Lembur/LM selalu dimulai tanggal 1 setiap bulan.",
+ "Setelah Jumat (closing), hari Sabtu otomatis masuk periode berikutnya.",
+ "Kode absensi: T=Terlambat, SH=Setengah Hari, A=Alpha, SD=Surat Dokter, DL=Dinas Luar, CT=Cuti.",
+ "T mendapat Uang Makan &amp; gaji penuh, potongan Rp10.000/kejadian.",
+ "SH mendapat Uang Makan, potongan 1/2 hari gaji.",
+ "A dipotong 1 hari gaji dan tidak mendapat Uang Makan.",
+ "SD/DL/CT mendapat gaji penuh tetapi tidak mendapat Uang Makan.",
+ "Lembur hari kerja = Rp20.000/jam.",
+ "Lembur hari libur/tanggal merah = ((Gaji Pokok/26)×2)/8 per jam.",
+];
+
+let employees = [];
+let attendance = {}; // { "YYYY-M": { empId: { day: {kode,lb,lm} } } }
+let state = { tab:'karyawan', month: 7, year: 2026, absMode:'kehadiran', editingEmpId:null, empBulananId:null, empUMId:null, umPeriodIdx:0 };
+
+const SEED_EMPLOYEES = [
+ ["Fitriah Afifah Noor","Maybank","8.746.935.140","PURCHASING",4200000,117500,75000,20000],
+ ["Budi Santoso","Maybank","8.753.031.593","SECURITY",2250000,0,0,0],
+ ["Eko Priyanto","Maybank","8.746.937.959","ELEKTRIK",5000000,0,0,20000],
+ ["Dhanu Harianto Sapto Pratowo","Maybank","8.746.939.533","PENGAWAS FINISHING",5000000,0,30000,20000],
+ ["Moch Harianto","BCA","7.355.418.898","TRIMING",3000000,0,0,20000],
+ ["M Yazid Assiddiki","Maybank","8.746.939.566","GUDANG",2250000,0,10000,20000],
+ ["Darmawan Dwi Harmoko","Maybank","8.746.939.552","GUDANG",2250000,0,15000,20000],
+ ["Adek Setioko","Maybank","8.746.941.167","TRIMING",3000000,0,0,20000],
+ ["Anselino Dhanu Tirta","Maybank","8.746.941.153","ELEKTRIK",3500000,0,0,20000],
+ ["Iwan Mardiyanto","Maybank","8.746.941.170","TRIMING",4000000,0,0,20000],
+ ["Pandu Setyaji","Maybank","8.746.942.134","FINISHING",3500000,0,0,20000],
+ ["Gustin Galih Rachma","Maybank","8.746.942.120","FINISHING",3500000,0,0,20000],
+ ["Fahral Athallah Chandra","Maybank","8.746.944.724","ADMIN",4000000,0,30000,20000],
+ ["Ristianingsih","Maybank","8.746.947.116","ADMIN GUDANG",3000000,0,29170,20000],
+ ["Farrel Rizky Ramadhan","Maybank","8.746.947.096","QC FINISHING",4000000,0,50000,20000],
+ ["Gustaf Arrozaq Belmiro","Maybank","8.746.947.106","QC FINISHING",3000000,0,0,20000],
+ ["Dhimas Irvansa Suwardani","Maybank","8.746.948.289","GUDANG",2250000,0,0,20000],
+ ["Indra Pramudya R","Maybank","8.746.942.237","RND",8500000,0,20000,20000],
+ ["Fabianus Siltian Simbarja","Maybank","8.746.942.141","ENGINEERING",8500000,0,20000,20000],
+ ["Heru Kusyanto","Maybank","8.746.942.124","MANAGER",12000000,0,50000,20000],
+ ["Kardo T Panjaitan","Maybank","8.746.942.244","QC",12000000,0,50000,20000],
+ ["Imma","Maybank","8.746.942.244","QC",3000000,0,0,20000],
+].map((r,i)=>({
+  id:'emp_'+(i+1), name:r[0], bankName:r[1], rekening:r[2], bagian:r[3],
+  gajiPokok:r[4], bpjs:r[5], umRate:r[6], lemburBiasaRate:r[7], potTerlambatRate:10000
+}));
+
+/* ============================= STORAGE ============================= */
+async function loadData(){
+  try{
+    const res = await window.storage.get('karyawan', false);
+    employees = res && res.value ? JSON.parse(res.value) : null;
+  }catch(e){ employees = null; }
+  if(!employees || !employees.length){
+    employees = SEED_EMPLOYEES;
+    await saveEmployees();
+  }
+}
+async function saveEmployees(){
+  try{ await window.storage.set('karyawan', JSON.stringify(employees), false); }
+  catch(e){ showToast('Gagal menyimpan data karyawan'); }
+}
+function monthKey(y,m){ return y+'-'+m; }
+async function loadAttendanceForMonth(y,m){
+  const key = 'absensi_'+monthKey(y,m);
+  if(attendance[monthKey(y,m)]) return;
+  try{
+    const res = await window.storage.get(key, false);
+    attendance[monthKey(y,m)] = res && res.value ? JSON.parse(res.value) : {};
+  }catch(e){
+    attendance[monthKey(y,m)] = {};
+  }
+}
+let saveAttTimer=null;
+function saveAttendance(y,m){
+  clearTimeout(saveAttTimer);
+  saveAttTimer = setTimeout(async ()=>{
+    const key = 'absensi_'+monthKey(y,m);
+    try{ await window.storage.set(key, JSON.stringify(attendance[monthKey(y,m)]||{}), false); }
+    catch(e){ showToast('Gagal menyimpan absensi'); }
+  }, 250);
+}
+
+/* ============================= HELPERS ============================= */
+function rupiah(n){
+  n = Math.round(n||0);
+  const neg = n<0; n=Math.abs(n);
+  const s = n.toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+  return (neg?'-':'')+'Rp'+s;
+}
+function daysInMonth(y,m){ return new Date(y,m,0).getDate(); }
+function getPeriods(y,m){
+  const dim = daysInMonth(y,m);
+  let periods=[]; let start=1;
+  for(let d=1; d<=dim; d++){
+    const dow = new Date(y,m-1,d).getDay();
+    if(dow===5){ periods.push({start,end:d}); start=d+1; }
+  }
+  if(start<=dim) periods.push({start,end:dim});
+  return periods;
+}
+function lemburMerahRate(emp){ return (emp.gajiPokok/26*2)/8; }
+function dailyRate(emp){ return emp.gajiPokok/26; }
+function getAttRec(y,m,empId,day){
+  const mk = monthKey(y,m);
+  attendance[mk] = attendance[mk]||{};
+  attendance[mk][empId] = attendance[mk][empId]||{};
+  attendance[mk][empId][day] = attendance[mk][empId][day]||{kode:'',lb:0,lm:0};
+  return attendance[mk][empId][day];
+}
+function calcRange(emp,y,m,start,end){
+  const mk = monthKey(y,m);
+  const empAtt = (attendance[mk]||{})[emp.id] || {};
+  let cT=0,cSH=0,cA=0,cSD=0,cDL=0,cCT=0,cUM=0,jamLB=0,jamLM=0;
+  for(let d=start; d<=end; d++){
+    const rec = empAtt[d] || {kode:'',lb:0,lm:0};
+    const dow = new Date(y,m-1,d).getDay();
+    if(dow!==0){
+      switch(rec.kode){
+        case 'T': cT++; cUM++; break;
+        case 'SH': cSH++; cUM++; break;
+        case 'A': cA++; break;
+        case 'SD': cSD++; break;
+        case 'DL': cDL++; break;
+        case 'CT': cCT++; break;
+        default: cUM++; break;
+      }
+    }
+    jamLB += Number(rec.lb||0);
+    jamLM += Number(rec.lm||0);
+  }
+  const dr = dailyRate(emp);
+  const potTidakMasuk = cA*dr;
+  const potTerlambat = cT*emp.potTerlambatRate;
+  const potSetengahHari = cSH*(dr/2);
+  const uangMakan = cUM*emp.umRate;
+  const lemburBiasaRp = jamLB*emp.lemburBiasaRate;
+  const lemburMerahRp = jamLM*lemburMerahRate(emp);
+  return {cT,cSH,cA,cSD,cDL,cCT,cUM,jamLB,jamLM,potTidakMasuk,potTerlambat,potSetengahHari,uangMakan,lemburBiasaRp,lemburMerahRp};
+}
+function calcMonthly(emp,y,m){
+  const dim = daysInMonth(y,m);
+  const c = calcRange(emp,y,m,1,dim);
+  // Slip bulanan TIDAK memasukkan UM maupun lembur karena dibayarkan mingguan
+  const total = emp.gajiPokok - emp.bpjs - c.potTidakMasuk - c.potTerlambat - c.potSetengahHari;
+  return Object.assign({total}, c);
+}
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+/* ============================= NAV / TABS ============================= */
+document.querySelectorAll('nav.tabs button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    state.tab = btn.dataset.tab;
+    document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.toggle('active', b===btn));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    document.getElementById('panel-'+state.tab).classList.add('active');
+    renderActiveTab();
+  });
+});
+
+const selMonth = document.getElementById('selMonth');
+const selYear = document.getElementById('selYear');
+BULAN_ID.forEach((b,i)=>{
+  const o=document.createElement('option'); o.value=i+1; o.textContent=b; selMonth.appendChild(o);
+});
+for(let y=2024;y<=2028;y++){
+  const o=document.createElement('option'); o.value=y; o.textContent=y; selYear.appendChild(o);
+}
+selMonth.value = state.month; selYear.value = state.year;
+selMonth.addEventListener('change', async ()=>{ state.month=+selMonth.value; await loadAttendanceForMonth(state.year,state.month); renderActiveTab(); });
+selYear.addEventListener('change', async ()=>{ state.year=+selYear.value; await loadAttendanceForMonth(state.year,state.month); renderActiveTab(); });
+
+async function renderActiveTab(){
+  if(state.tab==='karyawan') renderKaryawan();
+  else if(state.tab==='absensi'){ await loadAttendanceForMonth(state.year,state.month); renderAbsensi(); }
+  else if(state.tab==='slipBulanan'){ await loadAttendanceForMonth(state.year,state.month); renderSlipBulanan(); }
+  else if(state.tab==='slipUM'){ await loadAttendanceForMonth(state.year,state.month); renderSlipUM(); }
+  else if(state.tab==='rekapUM'){ await loadAttendanceForMonth(state.year,state.month); renderRekapUM(); }
+  else if(state.tab==='rekap'){ await loadAttendanceForMonth(state.year,state.month); renderRekap(); }
+  else if(state.tab==='readme') renderReadme();
+}
+
+/* ============================= KARYAWAN TAB ============================= */
+function renderKaryawan(){
+  const tbody = document.querySelector('#tblEmp tbody');
+  if(!employees.length){
+    tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><div class="em-ic">🗂</div>Belum ada karyawan. Klik "Tambah Karyawan".</div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = employees.map(e=>`
+    <tr>
+      <td><strong>${esc(e.name)}</strong></td>
+      <td><span class="tag">${esc(e.bagian)}</span></td>
+      <td class="mono">${esc(e.bankName)} · ${esc(e.rekening)}</td>
+      <td class="num">${rupiah(e.gajiPokok)}</td>
+      <td class="num">${rupiah(e.bpjs)}</td>
+      <td class="num">${rupiah(e.umRate)}</td>
+      <td class="num">${rupiah(e.lemburBiasaRate)}</td>
+      <td>
+        <button class="btn btn-sm btn-ghost" data-edit="${e.id}">Edit</button>
+        <button class="btn btn-sm btn-ghost btn-danger" data-del="${e.id}">Hapus</button>
+      </td>
+    </tr>`).join('');
+  tbody.querySelectorAll('[data-edit]').forEach(b=>b.addEventListener('click', ()=>openEmpModal(b.dataset.edit)));
+  tbody.querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click', ()=>deleteEmp(b.dataset.del)));
+}
+function esc(s){ return (s==null?'':String(s)).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+const empModalBackdrop = document.getElementById('empModalBackdrop');
+document.getElementById('btnAddEmp').addEventListener('click', ()=>openEmpModal(null));
+document.getElementById('empModalClose').addEventListener('click', closeEmpModal);
+document.getElementById('empModalCancel').addEventListener('click', closeEmpModal);
+function closeEmpModal(){ empModalBackdrop.classList.remove('open'); }
+function openEmpModal(id){
+  state.editingEmpId = id;
+  const emp = id ? employees.find(e=>e.id===id) : null;
+  document.getElementById('empModalTitle').textContent = emp ? 'Edit Karyawan' : 'Tambah Karyawan';
+  document.getElementById('fNama').value = emp?emp.name:'';
+  document.getElementById('fBagian').value = emp?emp.bagian:'';
+  document.getElementById('fBank').value = emp?emp.bankName:'Maybank';
+  document.getElementById('fRek').value = emp?emp.rekening:'';
+  document.getElementById('fGaji').value = emp?emp.gajiPokok:'';
+  document.getElementById('fBpjs').value = emp?emp.bpjs:0;
+  document.getElementById('fUM').value = emp?emp.umRate:0;
+  document.getElementById('fLB').value = emp?emp.lemburBiasaRate:20000;
+  document.getElementById('fTerlambat').value = emp?emp.potTerlambatRate:10000;
+  updateLemburMerahPreview();
+  empModalBackdrop.classList.add('open');
+}
+document.getElementById('fGaji').addEventListener('input', updateLemburMerahPreview);
+function updateLemburMerahPreview(){
+  const g = Number(document.getElementById('fGaji').value||0);
+  const rate = (g/26*2)/8;
+  document.getElementById('lemburMerahPreview').innerHTML =
+    'Tarif lembur tanggal merah dihitung otomatis: <strong>'+rupiah(rate)+'/jam</strong> — dari rumus ((Gaji Pokok/26)×2)/8.';
+}
+document.getElementById('empModalSave').addEventListener('click', async ()=>{
+  const name = document.getElementById('fNama').value.trim();
+  if(!name){ showToast('Nama wajib diisi'); return; }
+  const data = {
+    name, bagian: document.getElementById('fBagian').value.trim()||'-',
+    bankName: document.getElementById('fBank').value.trim()||'-',
+    rekening: document.getElementById('fRek').value.trim()||'-',
+    gajiPokok: Number(document.getElementById('fGaji').value||0),
+    bpjs: Number(document.getElementById('fBpjs').value||0),
+    umRate: Number(document.getElementById('fUM').value||0),
+    lemburBiasaRate: Number(document.getElementById('fLB').value||0),
+    potTerlambatRate: Number(document.getElementById('fTerlambat').value||0),
+  };
+  if(state.editingEmpId){
+    const emp = employees.find(e=>e.id===state.editingEmpId);
+    Object.assign(emp, data);
+  } else {
+    data.id = 'emp_'+Date.now();
+    employees.push(data);
+  }
+  await saveEmployees();
+  closeEmpModal();
+  renderKaryawan();
+  populateEmpSelects();
+  showToast('Data karyawan tersimpan');
+});
+async function deleteEmp(id){
+  const emp = employees.find(e=>e.id===id);
+  if(!confirm('Hapus karyawan "'+emp.name+'"? Data absensi terkait tidak akan otomatis terhapus.')) return;
+  employees = employees.filter(e=>e.id!==id);
+  await saveEmployees();
+  renderKaryawan();
+  populateEmpSelects();
+  showToast('Karyawan dihapus');
+}
+
+/* ============================= ABSENSI TAB ============================= */
+document.querySelectorAll('#segAbsMode button').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    state.absMode = b.dataset.mode;
+    document.querySelectorAll('#segAbsMode button').forEach(x=>x.classList.toggle('active', x===b));
+    renderAbsensi();
+  });
+});
+function renderAbsensi(){
+  document.getElementById('absMonthLabel').textContent = '— '+BULAN_ID[state.month-1]+' '+state.year;
+  const dim = daysInMonth(state.year, state.month);
+  const days = Array.from({length:dim}, (_,i)=>i+1);
+  let thead = '<tr><th class="name-col">Nama</th>' + days.map(d=>{
+    const dow = new Date(state.year, state.month-1, d).getDay();
+    const cls = dow===0?'sunday':(dow===5?'friday':'');
+    return `<th class="${cls}">${d}<span class="dow">${DOW_ID[dow]}</span></th>`;
+  }).join('') + '</tr>';
+
+  let rows = employees.map(emp=>{
+    let cells = days.map(d=>{
+      const dow = new Date(state.year, state.month-1, d).getDay();
+      const rec = getAttRec(state.year, state.month, emp.id, d);
+      if(state.absMode==='kehadiran'){
+        const disabled = dow===0 ? 'disabled' : '';
+        const cls = (dow===0?'sunday ':'') + (dow===5?'friday ':'') + (rec.kode?'code-'+rec.kode:'');
+        const opts = KODE_LIST.map(k=>`<option value="${k.v}" ${rec.kode===k.v?'selected':''}>${k.v||'—'}</option>`).join('');
+        return `<td class="${cls}" ${disabled?'':''}><select ${disabled} data-emp="${emp.id}" data-day="${d}" data-field="kode">${disabled?'<option>—</option>':opts}</select></td>`;
+      } else {
+        const field = state.absMode; // lb or lm
+        const cls = (dow===0?'sunday ':'') + (dow===5?'friday ':'');
+        const val = field==='lb'?rec.lb:rec.lm;
+        return `<td class="${cls}"><input type="number" min="0" step="0.5" value="${val||''}" placeholder="0" data-emp="${emp.id}" data-day="${d}" data-field="${field}"></td>`;
+      }
+    }).join('');
+    return `<tr><td class="name-col">${esc(emp.name)}</td>${cells}</tr>`;
+  }).join('');
+
+  if(!employees.length){
+    document.getElementById('attGridWrap').innerHTML = '<div class="empty-state"><div class="em-ic">🗓</div>Tambahkan karyawan dulu di tab Karyawan.</div>';
+    document.getElementById('attLegend').innerHTML='';
+    return;
+  }
+
+  document.getElementById('attGridWrap').innerHTML = `<table class="att"><thead>${thead}</thead><tbody>${rows}</tbody></table>`;
+  document.getElementById('attLegend').innerHTML = state.absMode==='kehadiran'
+    ? KODE_LIST.filter(k=>k.v).map(k=>`<span><b>${k.v}</b> ${k.label.split('— ')[1]}</span>`).join('')
+      + '<span style="color:var(--red)">Kolom merah = Minggu (libur, tidak diabsen)</span>'
+      + '<span style="color:var(--amber)">Kolom kuning = Jumat (hari closing)</span>'
+    : '<span>Isi jumlah jam lembur pada tanggal terkait. Minggu ditandai merah sebagai referensi hari libur.</span>';
+
+  document.getElementById('attGridWrap').querySelectorAll('select,input').forEach(el=>{
+    el.addEventListener('change', onAttChange);
+    if(el.tagName==='INPUT') el.addEventListener('input', onAttChange);
+  });
+}
+function onAttChange(e){
+  const el = e.target;
+  const empId = el.dataset.emp, day = +el.dataset.day, field = el.dataset.field;
+  const rec = getAttRec(state.year, state.month, empId, day);
+  if(field==='kode') rec.kode = el.value;
+  else rec[field] = Number(el.value||0);
+  saveAttendance(state.year, state.month);
+  if(field==='kode'){
+    const td = el.closest('td');
+    td.className = td.className.replace(/code-\S+/g,'').trim();
+    if(el.value) td.classList.add('code-'+el.value);
+  }
+}
+
+/* ============================= SLIP BULANAN TAB ============================= */
+function populateEmpSelects(){
+  [['selEmpBulanan','empBulananId'],['selEmpUM','empUMId']].forEach(([selId,stKey])=>{
+    const sel = document.getElementById(selId);
+    const current = state[stKey];
+    sel.innerHTML = employees.map(e=>`<option value="${e.id}">${esc(e.name)} — ${esc(e.bagian)}</option>`).join('');
+    if(employees.find(e=>e.id===current)) sel.value = current;
+    else state[stKey] = employees[0]?employees[0].id:null;
+    sel.value = state[stKey]||'';
+  });
+}
+document.getElementById('selEmpBulanan').addEventListener('change', e=>{ state.empBulananId=e.target.value; renderSlipBulanan(); });
+document.getElementById('selEmpUM').addEventListener('change', e=>{ state.empUMId=e.target.value; state.umPeriodIdx=0; renderSlipUM(); });
+
+function renderSlipBulanan(){
+  populateEmpSelects();
+  const wrap = document.getElementById('slipBulananWrap');
+  const emp = employees.find(e=>e.id===state.empBulananId);
+  if(!emp){ wrap.innerHTML = emptySlipMsg(); return; }
+  const c = calcMonthly(emp, state.year, state.month);
+  wrap.innerHTML = slipBulananHTML(emp, c);
+}
+function emptySlipMsg(){
+  return '<div class="empty-state"><div class="em-ic">🧾</div>Tambahkan karyawan dulu di tab Karyawan.</div>';
+}
+function slipBulananHTML(emp, c){
+  return `
+  <div class="slip">
+    <div class="slip-head">
+      <span class="slip-badge">Slip Gaji Bulanan</span>
+      <h2>${esc(emp.name)}</h2>
+      <div class="meta mono">${esc(emp.bankName)} · ${esc(emp.rekening)}</div>
+      <div class="meta">Periode ${BULAN_ID[state.month-1]} ${state.year}</div>
+      <div class="bagian">Bagian: ${esc(emp.bagian)}</div>
+    </div>
+    <div class="slip-body">
+      <div class="slip-line"><div class="lbl">Gaji Pokok</div><div class="val">${rupiah(emp.gajiPokok)}</div></div>
+      <div class="slip-line"><div class="lbl">Potongan BPJS Ketenagakerjaan</div><div class="val neg">-${rupiah(emp.bpjs)}</div></div>
+      <div class="slip-line"><div class="lbl">Potongan Tidak Masuk<small>${c.cA} hari Alpha</small></div><div class="val neg">-${rupiah(c.potTidakMasuk)}</div></div>
+      <div class="slip-line"><div class="lbl">Potongan Terlambat<small>${c.cT}× kejadian</small></div><div class="val neg">-${rupiah(c.potTerlambat)}</div></div>
+      <div class="slip-line"><div class="lbl">Potongan Setengah Hari<small>${c.cSH} hari</small></div><div class="val neg">-${rupiah(c.potSetengahHari)}</div></div>
+
+      <div class="slip-line sub"><div class="lbl">Ket. absensi lain</div><div class="val">SD:${c.cSD} · DL:${c.cDL} · CT:${c.cCT}</div></div>
+    </div>
+    <div class="slip-total"><div class="lbl">Total Diterima</div><div class="val">${rupiah(c.total)}</div></div>
+    <div class="slip-sign">
+      <div>Mengetahui:<div class="line">Ibu Sheny / Darren H</div></div>
+      <div>Diterima:<div class="line">${esc(emp.name)}</div></div>
+    </div>
+  </div>`;
+}
+document.getElementById('btnPrintBulanan').addEventListener('click', ()=>{
+  const wrap = document.getElementById('slipBulananWrap');
+  if(!wrap.innerHTML.trim()) return;
+  document.getElementById('print-area').innerHTML = wrap.innerHTML;
+  window.print();
+});
+
+/* ============================= SLIP UM+LEMBUR TAB ============================= */
+function renderSlipUM(){
+  populateEmpSelects();
+  const emp = employees.find(e=>e.id===state.empUMId);
+  const wrap = document.getElementById('slipUMWrap');
+  const periodTabs = document.getElementById('periodTabs');
+  if(!emp){ wrap.innerHTML = emptySlipMsg(); periodTabs.innerHTML=''; return; }
+  const periods = getPeriods(state.year, state.month);
+  if(state.umPeriodIdx>=periods.length) state.umPeriodIdx=0;
+  periodTabs.innerHTML = periods.map((p,i)=>
+    `<button data-i="${i}" class="${i===state.umPeriodIdx?'active':''}">Minggu ${i+1}</button>`).join('');
+  periodTabs.querySelectorAll('button').forEach(b=>b.addEventListener('click', ()=>{
+    state.umPeriodIdx = +b.dataset.i; renderSlipUM();
+  }));
+  const p = periods[state.umPeriodIdx];
+  const c = calcRange(emp, state.year, state.month, p.start, p.end);
+  const total = c.uangMakan + c.lemburBiasaRp + c.lemburMerahRp;
+  wrap.innerHTML = `
+    <div class="period-range" style="text-align:center;margin-bottom:10px;">Tanggal ${p.start}–${p.end} ${BULAN_ID[state.month-1]} ${state.year}</div>
+    <div class="slip">
+      <div class="slip-head">
+        <span class="slip-badge">Slip Uang Makan + Lembur — Minggu ${state.umPeriodIdx+1}</span>
+        <h2>${esc(emp.name)}</h2>
+        <div class="meta mono">${esc(emp.bankName)} · ${esc(emp.rekening)}</div>
+        <div class="bagian">Bagian: ${esc(emp.bagian)}</div>
+      </div>
+      <div class="slip-body">
+        <div class="slip-line sub"><div class="lbl">Potongan Tidak Masuk</div><div class="val">${rupiah(c.potTidakMasuk)}</div></div>
+        <div class="slip-line sub"><div class="lbl">Potongan Terlambat</div><div class="val">${rupiah(c.potTerlambat)}</div></div>
+        <div class="slip-line sub"><div class="lbl">Potongan Setengah Hari</div><div class="val">${rupiah(c.potSetengahHari)}</div></div>
+
+      </div>
+      <div class="slip-total"><div class="lbl">Total Minggu Ini</div><div class="val">${rupiah(total)}</div></div>
+      <div class="slip-sign">
+        <div>Mengetahui:<div class="line">Ibu Sheny / Darren H</div></div>
+        <div>Diterima:<div class="line">${esc(emp.name)}</div></div>
+      </div>
+    </div>`;
+}
+document.getElementById('btnPrintUM').addEventListener('click', ()=>{
+  const wrap = document.getElementById('slipUMWrap');
+  if(!wrap.innerHTML.trim()) return;
+  document.getElementById('print-area').innerHTML = wrap.innerHTML;
+  window.print();
+});
+
+/* ============================= REKAP TAB ============================= */
+function renderRekap(){
+  document.getElementById('rekapMonthLabel').textContent = '— '+BULAN_ID[state.month-1]+' '+state.year;
+  const tbody = document.querySelector('#tblRekap tbody');
+  if(!employees.length){
+    tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><div class="em-ic">📊</div>Belum ada data.</div></td></tr>';
+    document.getElementById('kpiRow').innerHTML='';
+    return;
+  }
+  let totalGaji=0, totalPot=0, totalUM=0, totalLembur=0, totalTHP=0;
+  const rows = employees.map(emp=>{
+    const c = calcMonthly(emp, state.year, state.month);
+    const pot = emp.bpjs + c.potTidakMasuk + c.potTerlambat + c.potSetengahHari;
+    const lembur = c.lemburBiasaRp + c.lemburMerahRp;
+    totalGaji += emp.gajiPokok; totalPot += pot; totalUM += c.uangMakan; totalLembur += lembur; totalTHP += c.total;
+    return `<tr>
+      <td><strong>${esc(emp.name)}</strong></td>
+      <td><span class="tag">${esc(emp.bagian)}</span></td>
+      <td class="num">${rupiah(emp.gajiPokok)}</td>
+      <td class="num" style="color:var(--red)">-${rupiah(pot)}</td>
+      <td class="num" style="color:var(--teal)">+${rupiah(c.uangMakan)}</td>
+      <td class="num" style="color:var(--teal)">+${rupiah(lembur)}</td>
+      <td class="num"><strong>${rupiah(c.total)}</strong></td>
+    </tr>`;
+  }).join('');
+  tbody.innerHTML = rows;
+  document.getElementById('kpiRow').innerHTML = `
+    <div class="kpi"><div class="kpi-label">Total Gaji Pokok</div><div class="kpi-val">${rupiah(totalGaji)}</div></div>
+    <div class="kpi"><div class="kpi-label">Total Potongan</div><div class="kpi-val" style="color:var(--red)">${rupiah(totalPot)}</div></div>
+    <div class="kpi"><div class="kpi-label">Total Uang Makan + Lembur</div><div class="kpi-val" style="color:var(--teal)">${rupiah(totalUM+totalLembur)}</div></div>
+    <div class="kpi"><div class="kpi-label">Total Take Home Pay</div><div class="kpi-val">${rupiah(totalTHP)}</div></div>
+  `;
+}
+
+/* ============================= README TAB ============================= */
+function renderReadme(){
+  document.getElementById('ruleList').innerHTML = RULES.map((r,i)=>
+    `<tr><td class="num" style="width:32px;color:var(--ink-soft)">${i+1}</td><td>${r}</td></tr>`).join('');
+}
+
+
+function renderRekapUM(){
+  const periods=getPeriods(state.year,state.month);
+  const sel=document.getElementById('weeklyPeriodSelect');
+  sel.innerHTML=periods.map((p,i)=>`<option value="${i}">UM${i+1} (${p.start}-${p.end})</option>`).join('');
+  if(state.umPeriodIdx>=periods.length) state.umPeriodIdx=0;
+  sel.value=state.umPeriodIdx;
+  sel.onchange=()=>{state.umPeriodIdx=+sel.value;renderRekapUM();};
+  const p=periods[state.umPeriodIdx];
+  let body='',tu=0,tl=0,tlm=0,tt=0;
+  employees.forEach(emp=>{
+    const c=calcRange(emp,state.year,state.month,p.start,p.end);
+    const total=c.uangMakan+c.lemburBiasaRp+c.lemburMerahRp;
+    tu+=c.uangMakan; tl+=c.lemburBiasaRp; tlm+=c.lemburMerahRp; tt+=total;
+    body+=`<tr>
+      <td>${emp.name}</td>
+      <td>${emp.bagian}</td>
+      <td class="num">${c.cUM}</td>
+      <td class="num">${c.jamLB}</td>
+      <td class="num">${c.jamLM}</td>
+      <td class="num">${rupiah(c.uangMakan)}</td>
+      <td class="num">${rupiah(c.lemburBiasaRp)}</td>
+      <td class="num">${rupiah(c.lemburMerahRp)}</td>
+      <td class="num"><strong>${rupiah(total)}</strong></td>
+    </tr>`;
+  });
+  body+=`<tr style="font-weight:bold;background:#eef6f3">
+  <td colspan="5">TOTAL</td>
+  <td class="num">${rupiah(tu)}</td>
+  <td class="num">${rupiah(tl)}</td>
+  <td class="num">${rupiah(tlm)}</td>
+  <td class="num">${rupiah(tt)}</td></tr>`;
+  document.getElementById('weeklyRekapBody').innerHTML=body;
+}
+
+/* ============================= INIT ============================= */
+(async function init(){
+  await loadData();
+  await loadAttendanceForMonth(state.year, state.month);
+  populateEmpSelects();
+  renderKaryawan();
+  renderReadme();
+})();
+
+
+
+document.addEventListener('DOMContentLoaded',()=>{
+function openPrintReport(panelId,title){
+ const panel=document.getElementById(panelId);
+ if(!panel) return;
+ const table=panel.querySelector('table');
+ if(!table) return;
+ const periode=document.getElementById('weeklyPeriodSelect')?document.getElementById('weeklyPeriodSelect').selectedOptions[0].text:'';
+ const w=window.open('','_blank');
+ w.document.write(`<!DOCTYPE html><html><head><title>${title}</title>
+ <style>
+ body{font-family:Arial,sans-serif;padding:30px}
+ h2,h3,p{text-align:center;margin:4px}
+ table{width:100%;border-collapse:collapse;margin-top:20px;font-size:12px}
+ th,td{border:1px solid #333;padding:6px}
+ th{background:#eee}
+ tfoot td{font-weight:bold}
+ .sign{display:flex;justify-content:space-between;margin-top:60px}
+ .sign div{text-align:center;width:220px}
+ @media print{button{display:none}}
+ </style></head><body>
+ <h2>PT MASTER ARTHA KHARISMA</h2>
+ <h3>${title}</h3>
+ <p>Periode : ${periode}</p>
+ <p>Tanggal Cetak : ${new Date().toLocaleDateString('id-ID')}</p>
+ ${table.outerHTML}
+ <div class="sign">
+ <div>Disiapkan Oleh<br><br><br>__________________</div>
+ <div>Disetujui Oleh<br><br><br>__________________</div>
+ </div>
+ <script>window.onload=function(){window.print();}</`+`script>
+ </body></html>`);
+ w.document.close();
+}
+const a=document.getElementById('btnPrintRekapUM');
+if(a)a.onclick=()=>openPrintReport('panel-rekapUM','REKAP UANG MAKAN DAN LEMBUR MINGGUAN');
+const b=document.getElementById('btnPrintRekap');
+if(b)b.onclick=()=>openPrintReport('panel-rekap','REKAP PAYROLL BULANAN');
+});
+
+</script>
+</body>
+</html>
