@@ -842,41 +842,130 @@ document.getElementById('btnPrintBulanan').addEventListener('click', ()=>{
 /* ============================= SLIP UM+LEMBUR TAB ============================= */
 function renderSlipUM(){
   populateEmpSelects();
+
   const emp = employees.find(e=>e.id===state.empUMId);
   const wrap = document.getElementById('slipUMWrap');
   const periodTabs = document.getElementById('periodTabs');
-  if(!emp){ wrap.innerHTML = emptySlipMsg(); periodTabs.innerHTML=''; return; }
-  const periods = getPeriods(state.year, state.month);
-  if(state.umPeriodIdx>=periods.length) state.umPeriodIdx=0;
-  periodTabs.innerHTML = periods.map((p,i)=>
-    `<button data-i="${i}" class="${i===state.umPeriodIdx?'active':''}">Minggu ${i+1}</button>`).join('');
-  periodTabs.querySelectorAll('button').forEach(b=>b.addEventListener('click', ()=>{
-    state.umPeriodIdx = +b.dataset.i; renderSlipUM();
-  }));
-  const p = periods[state.umPeriodIdx];
-  const c = calcRange(emp, state.year, state.month, p.start, p.end);
-  const total = c.uangMakan + c.lemburBiasaRp + c.lemburMerahRp;
-  wrap.innerHTML = `
-    <div class="period-range" style="text-align:center;margin-bottom:10px;">Tanggal ${p.start}–${p.end} ${BULAN_ID[state.month-1]} ${state.year}</div>
-    <div class="slip">
-      <div class="slip-head">
-        <span class="slip-badge">Slip Uang Makan + Lembur — Minggu ${state.umPeriodIdx+1}</span>
-        <h2>${esc(emp.name)}</h2>
-        <div class="meta mono">${esc(emp.bankName)} · ${esc(emp.rekening)}</div>
-        <div class="bagian">Bagian: ${esc(emp.bagian)}</div>
-      </div>
-      <div class="slip-body">
-        <div class="slip-line sub"><div class="lbl">Potongan Tidak Masuk</div><div class="val">${rupiah(c.potTidakMasuk)}</div></div>
-        <div class="slip-line sub"><div class="lbl">Potongan Terlambat</div><div class="val">${rupiah(c.potTerlambat)}</div></div>
-        <div class="slip-line sub"><div class="lbl">Potongan Setengah Hari</div><div class="val">${rupiah(c.potSetengahHari)}</div></div>
 
-      </div>
-      <div class="slip-total"><div class="lbl">Total Minggu Ini</div><div class="val">${rupiah(total)}</div></div>
-      <div class="slip-sign">
-        <div>Mengetahui:<div class="line">Ibu Sheny / Darren H</div></div>
-        <div>Diterima:<div class="line">${esc(emp.name)}</div></div>
-      </div>
-    </div>`;
+  if(!emp){
+    wrap.innerHTML = emptySlipMsg();
+    periodTabs.innerHTML='';
+    return;
+  }
+
+  const periods = getPeriods(state.year, state.month);
+
+  if(state.umPeriodIdx>=periods.length)
+    state.umPeriodIdx=0;
+
+  periodTabs.innerHTML = periods.map((p,i)=>
+    `<button data-i="${i}" class="${i===state.umPeriodIdx?'active':''}">
+        Minggu ${i+1}
+     </button>`
+  ).join('');
+
+  periodTabs.querySelectorAll('button').forEach(b=>{
+
+    b.onclick=()=>{
+
+      state.umPeriodIdx=Number(b.dataset.i);
+
+      renderSlipUM();
+
+    }
+
+  });
+
+  const p = periods[state.umPeriodIdx];
+
+  const c = calcRange(
+      emp,
+      state.year,
+      state.month,
+      p.start,
+      p.end
+  );
+
+  const total =
+      c.uangMakan +
+      c.lemburBiasaRp +
+      c.lemburMerahRp;
+
+  wrap.innerHTML=`
+
+<div class="period-range"
+style="text-align:center;margin-bottom:12px;">
+Periode :
+${p.start} - ${p.end}
+${BULAN_ID[state.month-1]}
+${state.year}
+</div>
+<div class="slip">
+<div class="slip-head">
+<span class="slip-badge">
+SLIP UANG MAKAN + LEMBUR
+</span>
+<h2>${esc(emp.name)}</h2>
+<div class="meta mono">
+${esc(emp.bankName)} · ${esc(emp.rekening)}
+</div>
+<div class="bagian">
+Bagian :
+<strong>${esc(emp.bagian)}</strong>
+</div>
+</div>
+<div class="slip-body">
+<div class="slip-line">
+<div class="lbl">Jumlah Hari Uang Makan</div>
+<div class="val">${c.cUM} Hari</div>
+</div>
+<div class="slip-line">
+<div class="lbl">Uang Makan</div>
+<div class="val">${rupiah(c.uangMakan)}</div>
+</div>
+<hr>
+<div class="slip-line">
+<div class="lbl">Jumlah Jam Lembur</div>
+<div class="val">${c.jamLB} Jam</div>
+</div>
+<div class="slip-line">
+<div class="lbl">Lembur Hari Biasa</div>
+<div class="val">${rupiah(c.lemburBiasaRp)}</div>
+</div>
+<hr>
+<div class="slip-line">
+<div class="lbl">Jumlah Jam Lembur Hari Libur</div>
+<div class="val">${c.jamLM} Jam</div>
+</div>
+<div class="slip-line">
+<div class="lbl">Lembur Hari Libur</div>
+<div class="val">${rupiah(c.lemburMerahRp)}</div>
+</div>
+</div>
+<div class="slip-total">
+<div class="lbl">
+TOTAL DITERIMA
+</div>
+<div class="val">
+${rupiah(total)}
+</div>
+</div>
+<div class="slip-sign">
+<div>
+Mengetahui
+<div class="line">
+Ibu Sheny / Darren H
+</div>
+</div>
+<div>
+Diterima
+<div class="line">
+${esc(emp.name)}
+</div>
+</div>
+</div>
+</div>
+`;
 }
 document.getElementById('btnPrintUM').addEventListener('click', ()=>{
   const wrap = document.getElementById('slipUMWrap');
