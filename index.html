@@ -961,15 +961,24 @@ function renderRekapUM(){
 }
 
 /* ============================= INIT ============================= */
-(async function init(){
-  await loadData();
-  await loadAttendance(state.year, state.month);
-  populateEmpSelects();
-  renderKaryawan();
-  renderReadme();
-})();
+document.addEventListener("DOMContentLoaded", async () => {
 
+    // Tunggu database.js selesai dimuat
+    while (typeof window.loadEmployees !== "function") {
+        await new Promise(resolve => setTimeout(resolve, 50));
+    }
 
+    await loadData();
+
+    await loadAttendance(state.year, state.month);
+
+    populateEmpSelects();
+
+    renderKaryawan();
+
+    renderReadme();
+
+});
 
 document.addEventListener('DOMContentLoaded',()=>{
 function openPrintReport(panelId,title){
