@@ -1,30 +1,31 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+
 import {
-  getFirestore,
-  collection,
-  addDoc
+    getFirestore
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCy5Cg24RpnfXRYnMIC8s_p4AgDGK0M55Y",
-  authDomain: "master-bus-payroll.firebaseapp.com",
-  projectId: "master-bus-payroll",
-  storageBucket: "master-bus-payroll.firebasestorage.app",
-  messagingSenderId: "1093538073835",
-  appId: "1:1093538073835:web:1e8f8f3001a15e75e042ae",
-  measurementId: "G-Q34GP1R77T"
+
+    apiKey: "...",
+
+    authDomain: "...",
+
+    projectId: "...",
+
+    storageBucket: "...",
+
+    messagingSenderId: "...",
+
+    appId: "...",
+
+    measurementId: "..."
+
 };
 
 const app = initializeApp(firebaseConfig);
+
 const db = getFirestore(app);
 
-console.log("Firebase berhasil dimuat!");
+window.db = db;
 
-window.testFirebase = async () => {
-  await addDoc(collection(db, "employees"), {
-    nama: "Test",
-    bagian: "ADMIN"
-  });
-
-  alert("Berhasil!");
-};
+export { db };

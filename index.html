@@ -466,40 +466,56 @@ const SEED_EMPLOYEES = [
   gajiPokok:r[4], bpjs:r[5], umRate:r[6], lemburBiasaRate:r[7], potTerlambatRate:10000
 }));
 
-/* ============================= STORAGE ============================= */
+/* ============================= DATABASE ============================= */
+
 async function loadData(){
-  try{
-    const res = await window.storage.get('karyawan', false);
-    employees = res && res.value ? JSON.parse(res.value) : null;
-  }catch(e){ employees = null; }
-  if(!employees || !employees.length){
-    employees = SEED_EMPLOYEES;
-    await saveEmployees();
-  }
+
+    employees = await loadEmployees();
+
+    if(!employees || employees.length===0){
+
+        employees = structuredClone(SEED_EMPLOYEES);
+
+        await saveEmployees(employees);
+
+    }
+
 }
-async function saveEmployees(){
-  try{ await window.storage.set('karyawan', JSON.stringify(employees), false); }
-  catch(e){ showToast('Gagal menyimpan data karyawan'); }
+
+function monthKey(year, month) {
+
+    return `${year}-${month}`;
+
 }
-function monthKey(y,m){ return y+'-'+m; }
-async function loadAttendanceForMonth(y,m){
-  const key = 'absensi_'+monthKey(y,m);
-  if(attendance[monthKey(y,m)]) return;
-  try{
-    const res = await window.storage.get(key, false);
-    attendance[monthKey(y,m)] = res && res.value ? JSON.parse(res.value) : {};
-  }catch(e){
-    attendance[monthKey(y,m)] = {};
-  }
+
+async function loadAttendance(year, month) {
+
+    const key = monthKey(year, month);
+
+    attendance[key] = await loadAttendanceData(key);
+
 }
-let saveAttTimer=null;
+
+let saveAttTimer = null;
+
 function saveAttendance(y,m){
-  clearTimeout(saveAttTimer);
-  saveAttTimer = setTimeout(async ()=>{
-    const key = 'absensi_'+monthKey(y,m);
-    try{ await window.storage.set(key, JSON.stringify(attendance[monthKey(y,m)]||{}), false); }
-    catch(e){ showToast('Gagal menyimpan absensi'); }
-  }, 250);
+
+    clearTimeout(saveAttTimer);
+
+    saveAttTimer = setTimeout(async()=>{
+
+        const key = monthKey(y,m);
+
+        await saveAttendanceData(
+
+            key,
+
+            attendance[key]
+
+        );
+
+    },300);
+
 }
 
 /* ============================= HELPERS ============================= */
@@ -593,16 +609,16 @@ for(let y=2024;y<=2028;y++){
   const o=document.createElement('option'); o.value=y; o.textContent=y; selYear.appendChild(o);
 }
 selMonth.value = state.month; selYear.value = state.year;
-selMonth.addEventListener('change', async ()=>{ state.month=+selMonth.value; await loadAttendanceForMonth(state.year,state.month); renderActiveTab(); });
-selYear.addEventListener('change', async ()=>{ state.year=+selYear.value; await loadAttendanceForMonth(state.year,state.month); renderActiveTab(); });
+selMonth.addEventListener('change', async ()=>{ state.month=+selMonth.value; await loadAttendance(state.year,state.month); renderActiveTab(); });
+selYear.addEventListener('change', async ()=>{ state.year=+selYear.value; await loadAttendance(state.year,state.month); renderActiveTab(); });
 
 async function renderActiveTab(){
   if(state.tab==='karyawan') renderKaryawan();
-  else if(state.tab==='absensi'){ await loadAttendanceForMonth(state.year,state.month); renderAbsensi(); }
-  else if(state.tab==='slipBulanan'){ await loadAttendanceForMonth(state.year,state.month); renderSlipBulanan(); }
-  else if(state.tab==='slipUM'){ await loadAttendanceForMonth(state.year,state.month); renderSlipUM(); }
-  else if(state.tab==='rekapUM'){ await loadAttendanceForMonth(state.year,state.month); renderRekapUM(); }
-  else if(state.tab==='rekap'){ await loadAttendanceForMonth(state.year,state.month); renderRekap(); }
+  else if(state.tab==='absensi'){ await loadAttendance(state.year,state.month); renderAbsensi(); }
+  else if(state.tab==='slipBulanan'){ await loadAttendance(state.year,state.month); renderSlipBulanan(); }
+  else if(state.tab==='slipUM'){ await loadAttendance(state.year,state.month); renderSlipUM(); }
+  else if(state.tab==='rekapUM'){ await loadAttendance(state.year,state.month); renderRekapUM(); }
+  else if(state.tab==='rekap'){ await loadAttendance(state.year,state.month); renderRekap(); }
   else if(state.tab==='readme') renderReadme();
 }
 
@@ -680,7 +696,7 @@ document.getElementById('empModalSave').addEventListener('click', async ()=>{
     data.id = 'emp_'+Date.now();
     employees.push(data);
   }
-  await saveEmployees();
+  await saveEmployees(employees);
   closeEmpModal();
   renderKaryawan();
   populateEmpSelects();
@@ -690,7 +706,7 @@ async function deleteEmp(id){
   const emp = employees.find(e=>e.id===id);
   if(!confirm('Hapus karyawan "'+emp.name+'"? Data absensi terkait tidak akan otomatis terhapus.')) return;
   employees = employees.filter(e=>e.id!==id);
-  await saveEmployees();
+  await saveEmployees(employees);
   renderKaryawan();
   populateEmpSelects();
   showToast('Karyawan dihapus');
@@ -947,7 +963,7 @@ function renderRekapUM(){
 /* ============================= INIT ============================= */
 (async function init(){
   await loadData();
-  await loadAttendanceForMonth(state.year, state.month);
+  await loadAttendance(state.year, state.month);
   populateEmpSelects();
   renderKaryawan();
   renderReadme();
@@ -995,6 +1011,7 @@ if(b)b.onclick=()=>openPrintReport('panel-rekap','REKAP PAYROLL BULANAN');
 });
 
 </script>
-<script type="module" src="firebase.js"></script>  
+<script type="module" src="firebase.js"></script>
+<script type="module" src="database.js"></script>
 </body>
 </html>
