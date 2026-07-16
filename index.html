@@ -321,6 +321,36 @@ animation:spin 1s linear infinite;
 transform:rotate(360deg);
 }
 }
+/* Save Status */
+.save-status{
+
+    font-size:13px;
+
+    font-weight:600;
+
+    padding:8px 14px;
+
+    border-radius:20px;
+
+    transition:.3s;
+
+}
+
+.save-status.saving{
+
+    color:#d97706;
+
+    background:#fef3c7;
+
+}
+
+.save-status.saved{
+
+    color:#15803d;
+
+    background:#dcfce7;
+
+}
 </style>
 </head>
 <body>
@@ -372,6 +402,11 @@ transform:rotate(360deg);
         <select id="selMonth"></select>
         <select id="selYear"></select>
     </div>
+    <div id="saveStatus" class="save-status saved">
+
+    🟢 Semua perubahan telah disimpan
+
+</div>
 </header>
 
   <nav class="tabs">
@@ -609,6 +644,7 @@ const RULES = [
 
 let employees = [];
 let isSaving = false;
+let savePromise = null;
 let isDirty = false;
 let attendance = {}; // { "YYYY-M": { empId: { day: {kode,lb,lm} } } }
 let state = { tab:'karyawan', month: 7, year: 2026, absMode:'kehadiran', editingEmpId:null, empBulananId:null, empUMId:null, umPeriodIdx:0 };
@@ -677,19 +713,24 @@ function saveAttendance(y,m){
 
     clearTimeout(saveAttTimer);
 
-    saveAttTimer = setTimeout(async()=>{
+    clearTimeout(saveTimer);
 
-        const key = monthKey(y,m);
+setSavingStatus(true);
 
+saveTimer = setTimeout(()=>{
+    isSaving = true;
+    savePromise = (async()=>{
+        const mk = monthKey(year,month);
         await saveAttendanceData(
-
-            key,
-
-            attendance[key]
-
+            mk,
+            attendance[mk]
         );
-
-    },300);
+    })();
+    savePromise.finally(()=>{
+        isSaving = false;
+        setSavingStatus(false);
+    });
+},500);
 
 }
 
@@ -697,6 +738,27 @@ function saveAttendance(y,m){
 function showLoading(){
 
     document.getElementById("loadingOverlay").style.display="flex";
+
+}
+function setSavingStatus(saving){
+
+    const el = document.getElementById("saveStatus");
+
+    if(!el) return;
+
+    if(saving){
+
+        el.className = "save-status saving";
+
+        el.innerHTML = "🟡 Menyimpan perubahan...";
+
+    }else{
+
+        el.className = "save-status saved";
+
+        el.innerHTML = "🟢 Semua perubahan telah disimpan";
+
+    }
 
 }
 async function saveCurrentTab(){
@@ -995,63 +1057,31 @@ document.querySelectorAll('nav.tabs button').forEach(btn=>{
 
     btn.addEventListener('click',async()=>{
 
-        if(isSaving){
+    if(isSaving){
 
-            showToast("Sedang menyimpan data...");
+        showLoading();
 
-            return;
+        await savePromise;
 
-        }
+        hideLoading();
 
-        if(isDirty){
+    }
 
-            const simpan = confirm(
+    state.tab = btn.dataset.tab;
 
-                "Ada perubahan yang belum disimpan.\n\nSimpan sebelum pindah tab?"
+    document
+    .querySelectorAll("nav.tabs button")
+    .forEach(b=>b.classList.toggle("active",b===btn));
 
-            );
+    document
+    .querySelectorAll(".panel")
+    .forEach(p=>p.classList.remove("active"));
 
-            if(simpan){
+    document
+    .getElementById("panel-"+state.tab)
+    .classList.add("active");
 
-                isSaving=true;
-
-                showLoading();
-
-                try{
-
-                    await saveCurrentTab();
-
-                }
-
-                finally{
-
-                    hideLoading();
-
-                    isSaving=false;
-
-                }
-
-            }
-
-        }
-
-        state.tab=btn.dataset.tab;
-
-        document
-        .querySelectorAll('nav.tabs button')
-        .forEach(b=>b.classList.toggle('active',b===btn));
-
-        document
-        .querySelectorAll('.panel')
-        .forEach(p=>p.classList.remove('active'));
-
-        document
-        .getElementById('panel-'+state.tab)
-        .classList.add('active');
-
-        await renderActiveTab();
-
-    });
+    await renderActiveTab();
 
 });
 
