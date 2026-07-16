@@ -339,6 +339,7 @@ font-size:14px;
   <nav class="tabs">
     <button data-tab="karyawan" class="active">Karyawan</button>
     <button data-tab="absensi">Absensi</button>
+    <button data-tab="lembur">Input Lembur</button>
     <button data-tab="slipBulanan">Slip Gaji Bulanan</button>
     <button data-tab="slipUM">Slip Uang Makan + Lembur</button>
     <button data-tab="rekapUM">Rekapan Mingguan</button>
@@ -382,6 +383,56 @@ font-size:14px;
     <div class="att-wrap"><div id="attGridWrap"></div></div>
     <div class="legend" id="attLegend"></div>
   </section>
+
+  <!-- PANEL LEMBUR -->
+  <section class="panel" id="panel-lembur">
+<div class="card card-pad">
+<h2 class="section-title">
+Input Lembur
+</h2>
+<p class="section-sub">
+Input lembur berdasarkan tanggal.
+Sistem otomatis menentukan apakah lembur hari biasa atau hari libur.
+</p>
+<div class="grid-2">
+<div class="field">
+<label>Nama Karyawan</label>
+<select id="otEmp"></select>
+</div>
+<div class="field">
+<label>Tanggal</label>
+<input type="date" id="otDate">
+</div>
+<div class="field">
+<label>Jumlah Jam Lembur</label>
+<input
+type="number"
+id="otHour"
+min="0"
+step="0.5"
+placeholder="Contoh : 4">
+</div>
+<div class="field">
+<label>&nbsp;</label>
+<button
+class="btn btn-primary"
+id="btnSaveOT"
+style="width:100%;height:42px">
+💾 Input Lembur
+</button>
+</div>
+</div>
+<div
+id="otInfo"
+style="
+margin-top:20px;
+padding:12px;
+background:#eef6ff;
+border-radius:8px;
+display:none;">
+</div>
+</div>
+</section>
 
   <!-- SLIP BULANAN -->
   <section class="panel" id="panel-slipBulanan">
@@ -659,6 +710,79 @@ function calcRange(emp,y,m,start,end){
   const lemburMerahRp = jamLM*lemburMerahRate(emp);
   return {cT,cSH,cA,cSD,cDL,cCT,cUM,jamLB,jamLM,potTidakMasuk,potTerlambat,potSetengahHari,uangMakan,lemburBiasaRp,lemburMerahRp};
 }
+/* ===========================================================
+   INPUT LEMBUR
+=========================================================== */
+function isHoliday(date){
+    const day = date.getDay();
+    // Minggu
+    if(day===0) return true;
+    // ===== TAMBAHKAN TANGGAL MERAH DI SINI =====
+    // Format YYYY-MM-DD
+    const holidays=[
+        "2026-01-01",
+        "2026-08-17",
+        "2026-12-25"
+    ];
+    const key=date.toISOString().slice(0,10);
+    return holidays.includes(key);
+}
+async function saveOvertime(){
+    const empId=document.getElementById("otEmp").value;
+    const date=document.getElementById("otDate").value;
+    const jam=Number(document.getElementById("otHour").value);
+    if(!empId){
+        alert("Pilih karyawan.");
+        return;
+    }
+    if(!date){
+        alert("Pilih tanggal.");
+        return;
+    }
+    if(jam<=0){
+        alert("Masukkan jumlah jam.");
+        return;
+    }
+    const dt=new Date(date);
+    const year=dt.getFullYear();
+    const month=dt.getMonth()+1;
+    const day=dt.getDate();
+    const mk=monthKey(year,month);
+    if(!attendance[mk])
+        attendance[mk]={};
+    if(!attendance[mk][empId])
+        attendance[mk][empId]={};
+    if(!attendance[mk][empId][day])
+        attendance[mk][empId][day]={
+            kode:"",
+            lb:0,
+            lm:0
+        };
+    const rec=attendance[mk][empId][day];
+    if(isHoliday(dt)){
+        rec.lm=jam;
+    }else{
+        rec.lb=jam;
+    }
+    attendance[mk][empId][day]=rec;
+    await saveAttendanceData(
+        mk,
+        attendance[mk]
+    );
+    document.getElementById("otInfo").style.display="block";
+    document.getElementById("otInfo").innerHTML=`
+        ✅ <strong>Lembur berhasil disimpan.</strong><br><br>
+        Tanggal :
+        ${date}<br>
+        Jenis :
+        ${isHoliday(dt)?"Hari Libur / Tanggal Merah":"Hari Kerja"}<br>
+        Jam :
+        <strong>${jam}</strong>
+    `;
+    renderAttendance();
+    renderSlipUM();
+    renderPayroll();
+}
 function calcMonthly(emp,y,m){
   const dim = daysInMonth(y,m);
   const c = calcRange(emp,y,m,1,dim);
@@ -699,6 +823,9 @@ selYear.addEventListener('change', async ()=>{ state.year=+selYear.value; await 
 async function renderActiveTab(){
   if(state.tab==='karyawan') renderKaryawan();
   else if(state.tab==='absensi'){ await loadAttendance(state.year,state.month); renderAbsensi(); }
+  else if(state.tab==='lembur'){
+    populateEmpSelects();
+}
   else if(state.tab==='slipBulanan'){ await loadAttendance(state.year,state.month); renderSlipBulanan(); }
   else if(state.tab==='slipUM'){ await loadAttendance(state.year,state.month); renderSlipUM(); }
   else if(state.tab==='rekapUM'){ await loadAttendance(state.year,state.month); renderRekapUM(); }
@@ -875,6 +1002,21 @@ function populateEmpSelects(){
     else state[stKey] = employees[0]?employees[0].id:null;
     sel.value = state[stKey]||'';
   });
+}
+const ot = document.getElementById("otEmp");
+
+if(ot){
+
+    ot.innerHTML = employees.map(e=>`
+
+        <option value="${e.id}">
+
+            ${e.name}
+
+        </option>
+
+    `).join("");
+
 }
 document.getElementById('selEmpBulanan').addEventListener('change', e=>{ state.empBulananId=e.target.value; renderSlipBulanan(); });
 document.getElementById('selEmpUM').addEventListener('change', e=>{ state.empUMId=e.target.value; state.umPeriodIdx=0; renderSlipUM(); });
@@ -1186,6 +1328,10 @@ function openPrintReport(panelId,title){
  </body></html>`);
  w.document.close();
 }
+const otDate=document.getElementById("otDate");
+if(otDate){
+    otDate.value=new Date().toISOString().split("T")[0];
+}
 const a=document.getElementById('btnPrintRekapUM');
 if(a)a.onclick=()=>openPrintReport('panel-rekapUM','REKAP UANG MAKAN DAN LEMBUR MINGGUAN');
 const b=document.getElementById('btnPrintRekap');
@@ -1207,12 +1353,13 @@ btnLogin.onclick = ()=>{
 };
 txtPassword.addEventListener("keypress",e=>{
     if(e.key==="Enter"){
-
         btnLogin.click();
-
     }
 });
-
+const btnOT=document.getElementById("btnSaveOT");
+if(btnOT){
+    btnOT.onclick=saveOvertime;
+}
 </script>
 <script type="module" src="firebase.js"></script>
 <script type="module" src="database.js"></script>
