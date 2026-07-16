@@ -839,28 +839,54 @@ selMonth.addEventListener('change', async ()=>{ state.month=+selMonth.value; awa
 selYear.addEventListener('change', async ()=>{ state.year=+selYear.value; await loadAttendance(state.year,state.month); renderActiveTab(); });
 
 async function renderActiveTab(){
-  if(state.tab==='karyawan') renderKaryawan();
-  else if(state.tab==='absensi'){ await loadAttendance(state.year,state.month); renderAbsensi(); }
-  else if(state.tab==='lembur'){
-    populateOvertimeEmployee();
+    if(state.tab==='karyawan'){
+        renderKaryawan();
+    }
+    else if(state.tab==='absensi'){
+        await loadAttendance(state.year,state.month);
+        renderAbsensi();
+    }
+    else if(state.tab==='lembur'){
+        populateOvertimeEmployee();
+    }
+    else if(state.tab==='slipBulanan'){
+        await loadAttendance(state.year,state.month);
+        renderSlipBulanan();
+    }
+    else if(state.tab==='slipUM'){
+        await loadAttendance(state.year,state.month);
+        renderSlipUM();
+    }
+    else if(state.tab==='rekapUM'){
+        await loadAttendance(state.year,state.month);
+        renderRekapUM();
+    }
+    else if(state.tab==='rekap'){
+        await loadAttendance(state.year,state.month);
+        renderRekap();
+    }
+    else if(state.tab==='readme'){
+        renderReadme();
+    }
 }
 function populateOvertimeEmployee(){
-    const ot = document.getElementById("otEmp");
+
+    const ot=document.getElementById("otEmp");
+
     if(!ot) return;
-    ot.innerHTML = "";
+
+    ot.innerHTML="";
+
     employees.forEach(emp=>{
+
         ot.innerHTML += `
             <option value="${emp.id}">
                 ${emp.name} — ${emp.bagian}
             </option>
         `;
+
     });
-}
-  else if(state.tab==='slipBulanan'){ await loadAttendance(state.year,state.month); renderSlipBulanan(); }
-  else if(state.tab==='slipUM'){ await loadAttendance(state.year,state.month); renderSlipUM(); }
-  else if(state.tab==='rekapUM'){ await loadAttendance(state.year,state.month); renderRekapUM(); }
-  else if(state.tab==='rekap'){ await loadAttendance(state.year,state.month); renderRekap(); }
-  else if(state.tab==='readme') renderReadme();
+
 }
 
 /* ============================= KARYAWAN TAB ============================= */
