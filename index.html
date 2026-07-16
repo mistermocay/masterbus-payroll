@@ -336,20 +336,25 @@ transform:rotate(360deg);
 
 }
 
-.save-status.saving{
-
-    color:#d97706;
-
-    background:#fef3c7;
-
-}
-
 .save-status.saved{
 
     color:#15803d;
 
     background:#dcfce7;
 
+}
+.toolbar-actions{
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+}
+#btnSaveAll{
+
+    min-width:140px;
+
+    transition:.25s;
 }
 </style>
 </head>
@@ -402,11 +407,12 @@ transform:rotate(360deg);
         <select id="selMonth"></select>
         <select id="selYear"></select>
     </div>
-    <div id="saveStatus" class="save-status saved">
+    <div class="toolbar-actions">
+    <button id="btnSaveAll" class="btn btn-primary">
 
-    🟢 Semua perubahan telah disimpan
-
-</div>
+        💾 SIMPAN
+    </button>
+    </div>
 </header>
 
   <nav class="tabs">
@@ -714,24 +720,6 @@ function saveAttendance(y,m){
     clearTimeout(saveAttTimer);
 
     clearTimeout(saveTimer);
-
-setSavingStatus(true);
-
-saveTimer = setTimeout(()=>{
-    isSaving = true;
-    savePromise = (async()=>{
-        const mk = monthKey(year,month);
-        await saveAttendanceData(
-            mk,
-            attendance[mk]
-        );
-    })();
-    savePromise.finally(()=>{
-        isSaving = false;
-        setSavingStatus(false);
-    });
-},500);
-
 }
 
 /* SHOW LOADING */ 
@@ -740,27 +728,7 @@ function showLoading(){
     document.getElementById("loadingOverlay").style.display="flex";
 
 }
-function setSavingStatus(saving){
 
-    const el = document.getElementById("saveStatus");
-
-    if(!el) return;
-
-    if(saving){
-
-        el.className = "save-status saving";
-
-        el.innerHTML = "🟡 Menyimpan perubahan...";
-
-    }else{
-
-        el.className = "save-status saved";
-
-        el.innerHTML = "🟢 Semua perubahan telah disimpan";
-
-    }
-
-}
 async function saveCurrentTab(){
 
     if(state.tab==="karyawan"){
@@ -1731,6 +1699,59 @@ txtPassword.addEventListener("keypress",e=>{
 const btnOT=document.getElementById("btnSaveOT");
 if(btnOT){
     btnOT.onclick=saveOvertime;
+}
+const btnSaveAll = document.getElementById("btnSaveAll");
+
+if(btnSaveAll){
+
+    btnSaveAll.onclick = async ()=>{
+
+        if(isSaving) return;
+
+        isSaving = true;
+
+        showLoading();
+
+        btnSaveAll.disabled = true;
+
+        btnSaveAll.innerHTML = "⏳ MENYIMPAN...";
+
+        try{
+
+            await saveCurrentTab();
+
+            btnSaveAll.innerHTML = "✅ TERSIMPAN";
+
+            showToast("Semua data berhasil disimpan.");
+
+        }
+
+        catch(err){
+
+            console.error(err);
+
+            btnSaveAll.innerHTML = "❌ GAGAL";
+
+        }
+
+        finally{
+
+            hideLoading();
+
+            setTimeout(()=>{
+
+                btnSaveAll.disabled = false;
+
+                btnSaveAll.innerHTML = "💾 SIMPAN";
+
+                isSaving = false;
+
+            },1500);
+
+        }
+
+    };
+
 }
 </script>
 <script type="module" src="firebase.js"></script>
