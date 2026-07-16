@@ -760,15 +760,34 @@ async function saveOvertime(){
         };
     const rec=attendance[mk][empId][day];
     if(isHoliday(dt)){
-        rec.lm=jam;
+        rec.lm = (Number(rec.lm)||0) + jam;
     }else{
-        rec.lb=jam;
+        rec.lb = (Number(rec.lb)||0) + jam;
     }
     attendance[mk][empId][day]=rec;
     await saveAttendanceData(
         mk,
         attendance[mk]
     );
+   // Relad data dari Firebase
+   await loadAttendance(year, month);
+   //Update semua tampilan
+   renderAbsensi();
+   renderSlipUM();
+   renderRekapUM();
+   renderRekap();
+
+   document.getElementById("otInfo").style.display="block";
+
+   document.getElementById("otInfo").innerHTML=`
+        ✅ <strong>Lembur berhasil disimpan.</strong><br><br>
+        Tanggal :
+        ${date}<br>
+        Jenis :
+        ${isHoliday(dt)?"Hari Libur / Tanggal Merah":"Hari Kerja"}<br>
+        Jam :
+        <strong>${jam}</strong>
+    `;
     document.getElementById("otInfo").style.display="block";
     document.getElementById("otInfo").innerHTML=`
         ✅ <strong>Lembur berhasil disimpan.</strong><br><br>
@@ -779,9 +798,8 @@ async function saveOvertime(){
         Jam :
         <strong>${jam}</strong>
     `;
-    renderAttendance();
+    renderAbsensi();
     renderSlipUM();
-    renderPayroll();
 }
 function calcMonthly(emp,y,m){
   const dim = daysInMonth(y,m);
@@ -824,7 +842,19 @@ async function renderActiveTab(){
   if(state.tab==='karyawan') renderKaryawan();
   else if(state.tab==='absensi'){ await loadAttendance(state.year,state.month); renderAbsensi(); }
   else if(state.tab==='lembur'){
-    populateEmpSelects();
+    populateOvertimeEmployee();
+}
+function populateOvertimeEmployee(){
+    const ot = document.getElementById("otEmp");
+    if(!ot) return;
+    ot.innerHTML = "";
+    employees.forEach(emp=>{
+        ot.innerHTML += `
+            <option value="${emp.id}">
+                ${emp.name} — ${emp.bagian}
+            </option>
+        `;
+    });
 }
   else if(state.tab==='slipBulanan'){ await loadAttendance(state.year,state.month); renderSlipBulanan(); }
   else if(state.tab==='slipUM'){ await loadAttendance(state.year,state.month); renderSlipUM(); }
