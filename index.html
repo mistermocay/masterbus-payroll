@@ -994,14 +994,35 @@ function onAttChange(e){
 
 /* ============================= SLIP BULANAN TAB ============================= */
 function populateEmpSelects(){
-  [['selEmpBulanan','empBulananId'],['selEmpUM','empUMId']].forEach(([selId,stKey])=>{
-    const sel = document.getElementById(selId);
-    const current = state[stKey];
-    sel.innerHTML = employees.map(e=>`<option value="${e.id}">${esc(e.name)} — ${esc(e.bagian)}</option>`).join('');
-    if(employees.find(e=>e.id===current)) sel.value = current;
-    else state[stKey] = employees[0]?employees[0].id:null;
-    sel.value = state[stKey]||'';
+  [
+    ['selEmpBulanan','empBulananId'],
+    ['selEmpUM','empUMId']
+  ].forEach(([selId,stKey])=>{
+    const sel=document.getElementById(selId);
+    if(!sel) return;
+    const current=state[stKey];
+    sel.innerHTML=employees.map(e=>`
+      <option value="${e.id}">
+        ${esc(e.name)} — ${esc(e.bagian)}
+      </option>
+    `).join('');
+    if(employees.find(e=>e.id===current))
+      sel.value=current;
+    else
+      state[stKey]=employees[0]?employees[0].id:null;
+    sel.value=state[stKey]||'';
   });
+  // =============================
+  // Dropdown Input Lembur
+  // =============================
+  const ot=document.getElementById("otEmp");
+  if(ot){
+      ot.innerHTML=employees.map(e=>`
+        <option value="${e.id}">
+            ${esc(e.name)} — ${esc(e.bagian)}
+        </option>
+      `).join('');
+  }
 }
 const ot = document.getElementById("otEmp");
 
@@ -1020,7 +1041,12 @@ if(ot){
 }
 document.getElementById('selEmpBulanan').addEventListener('change', e=>{ state.empBulananId=e.target.value; renderSlipBulanan(); });
 document.getElementById('selEmpUM').addEventListener('change', e=>{ state.empUMId=e.target.value; state.umPeriodIdx=0; renderSlipUM(); });
+document.getElementById("otEmp").addEventListener("change",e=>{
 
+    // kalau nanti diperlukan tinggal ambil
+    // e.target.value
+
+});
 function renderSlipBulanan(){
   populateEmpSelects();
   const wrap = document.getElementById('slipBulananWrap');
