@@ -290,9 +290,47 @@ font-size:14px;
   #print-area{display:block;}
 }
 
+#loadingOverlay{
+position:fixed;
+inset:0;
+background:rgba(255,255,255,.85);
+display:none;
+justify-content:center;
+align-items:center;
+z-index:999999;
+backdrop-filter:blur(2px);
+}
+.loading-card{
+background:white;
+padding:30px 45px;
+border-radius:16px;
+text-align:center;
+box-shadow:0 15px 40px rgba(0,0,0,.15);
+}
+.loading-spinner{
+width:50px;
+height:50px;
+margin:auto;
+border:5px solid #ddd;
+border-top:5px solid #2563eb;
+border-radius:50%;
+animation:spin 1s linear infinite;
+}
+@keyframes spin{
+100%{
+transform:rotate(360deg);
+}
+}
 </style>
 </head>
 <body>
+<div id="loadingOverlay">
+<div class="loading-card">
+<div class="loading-spinner"></div>
+<h3>Menyimpan Data...</h3>
+<p>Mohon tunggu.</p>
+</div>
+</div>
 <div id="loginScreen">
 
     <div class="login-card">
@@ -570,6 +608,7 @@ const RULES = [
 ];
 
 let employees = [];
+let isSaving = false;
 let attendance = {}; // { "YYYY-M": { empId: { day: {kode,lb,lm} } } }
 let state = { tab:'karyawan', month: 7, year: 2026, absMode:'kehadiran', editingEmpId:null, empBulananId:null, empUMId:null, umPeriodIdx:0 };
 
@@ -653,6 +692,18 @@ function saveAttendance(y,m){
 
 }
 
+/* SHOW LOADING */ 
+function showLoading(){
+
+    document.getElementById("loadingOverlay").style.display="flex";
+
+}
+
+function hideLoading(){
+
+    document.getElementById("loadingOverlay").style.display="none";
+
+}
 /* ============================= HELPERS ============================= */
 function rupiah(n){
   n = Math.round(n||0);
@@ -728,78 +779,121 @@ function isHoliday(date){
     return holidays.includes(key);
 }
 async function saveOvertime(){
-    const empId=document.getElementById("otEmp").value;
-    const date=document.getElementById("otDate").value;
-    const jam=Number(document.getElementById("otHour").value);
-    if(!empId){
-        alert("Pilih karyawan.");
-        return;
-    }
-    if(!date){
-        alert("Pilih tanggal.");
-        return;
-    }
-    if(jam<=0){
-        alert("Masukkan jumlah jam.");
-        return;
-    }
-    const dt=new Date(date);
-    const year=dt.getFullYear();
-    const month=dt.getMonth()+1;
-    const day=dt.getDate();
-    const mk=monthKey(year,month);
-    if(!attendance[mk])
-        attendance[mk]={};
-    if(!attendance[mk][empId])
-        attendance[mk][empId]={};
-    if(!attendance[mk][empId][day])
-        attendance[mk][empId][day]={
-            kode:"",
-            lb:0,
-            lm:0
-        };
-    const rec=attendance[mk][empId][day];
-    if(isHoliday(dt)){
-        rec.lm = (Number(rec.lm)||0) + jam;
-    }else{
-        rec.lb = (Number(rec.lb)||0) + jam;
-    }
-    attendance[mk][empId][day]=rec;
-    await saveAttendanceData(
-        mk,
-        attendance[mk]
-    );
-   // Relad data dari Firebase
-   await loadAttendance(year, month);
-   //Update semua tampilan
-   renderAbsensi();
-   renderSlipUM();
-   renderRekapUM();
-   renderRekap();
 
-   document.getElementById("otInfo").style.display="block";
+    if(isSaving) return;
 
-   document.getElementById("otInfo").innerHTML=`
-        ✅ <strong>Lembur berhasil disimpan.</strong><br><br>
-        Tanggal :
-        ${date}<br>
-        Jenis :
-        ${isHoliday(dt)?"Hari Libur / Tanggal Merah":"Hari Kerja"}<br>
-        Jam :
-        <strong>${jam}</strong>
-    `;
-    document.getElementById("otInfo").style.display="block";
-    document.getElementById("otInfo").innerHTML=`
-        ✅ <strong>Lembur berhasil disimpan.</strong><br><br>
-        Tanggal :
-        ${date}<br>
-        Jenis :
-        ${isHoliday(dt)?"Hari Libur / Tanggal Merah":"Hari Kerja"}<br>
-        Jam :
-        <strong>${jam}</strong>
-    `;
-    renderAbsensi();
-    renderSlipUM();
+    isSaving = true;
+
+    showLoading();
+
+    try{
+
+        const empId=document.getElementById("otEmp").value;
+        const date=document.getElementById("otDate").value;
+        const jam=Number(document.getElementById("otHour").value);
+
+        if(!empId){
+            alert("Pilih karyawan.");
+            return;
+        }
+
+        if(!date){
+            alert("Pilih tanggal.");
+            return;
+        }
+
+        if(jam<=0){
+            alert("Masukkan jumlah jam.");
+            return;
+        }
+
+        const dt=new Date(date);
+
+        const year=dt.getFullYear();
+
+        const month=dt.getMonth()+1;
+
+        const day=dt.getDate();
+
+        const mk=monthKey(year,month);
+
+        if(!attendance[mk])
+            attendance[mk]={};
+
+        if(!attendance[mk][empId])
+            attendance[mk][empId]={};
+
+        if(!attendance[mk][empId][day])
+            attendance[mk][empId][day]={
+                kode:"",
+                lb:0,
+                lm:0
+            };
+
+        const rec=attendance[mk][empId][day];
+
+        if(isHoliday(dt)){
+
+            rec.lm=(Number(rec.lm)||0)+jam;
+
+        }else{
+
+            rec.lb=(Number(rec.lb)||0)+jam;
+
+        }
+
+        attendance[mk][empId][day]=rec;
+
+        await saveAttendanceData(
+            mk,
+            attendance[mk]
+        );
+
+        await loadAttendance(year,month);
+
+        renderAbsensi();
+
+        renderSlipUM();
+
+        renderRekapUM();
+
+        renderRekap();
+
+        document.getElementById("otInfo").style.display="block";
+
+        document.getElementById("otInfo").innerHTML=`
+            ✅ <strong>Lembur berhasil disimpan.</strong><br><br>
+
+            Tanggal :
+            ${date}<br>
+
+            Jenis :
+            ${isHoliday(dt)?"Hari Libur / Tanggal Merah":"Hari Kerja"}<br>
+
+            Jam :
+            <strong>${jam}</strong>
+        `;
+
+        showToast("Lembur berhasil disimpan.");
+
+    }
+
+    catch(err){
+
+        console.error(err);
+
+        alert("Gagal menyimpan data ke Firebase.");
+
+    }
+
+    finally{
+
+        hideLoading();
+
+        isSaving=false;
+
+    }
+
 }
 function calcMonthly(emp,y,m){
   const dim = daysInMonth(y,m);
@@ -814,16 +908,58 @@ function showToast(msg){
   clearTimeout(t._timer);
   t._timer = setTimeout(()=>t.classList.remove('show'), 2200);
 }
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(()=>t.classList.remove('show'), 2200);
+}
 
+// =============================
+// LOADING SCREEN
+// =============================
+
+function showLoading(){
+
+    document.getElementById("loadingOverlay").style.display = "flex";
+
+}
+
+function hideLoading(){
+
+    document.getElementById("loadingOverlay").style.display = "none";
+
+}
 /* ============================= NAV / TABS ============================= */
 document.querySelectorAll('nav.tabs button').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    state.tab = btn.dataset.tab;
-    document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.toggle('active', b===btn));
-    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-    document.getElementById('panel-'+state.tab).classList.add('active');
-    renderActiveTab();
-  });
+
+    btn.addEventListener('click',async()=>{
+
+        if(isSaving){
+
+            showToast("Sedang menyimpan data...");
+
+            return;
+
+        }
+
+        state.tab = btn.dataset.tab;
+
+        document.querySelectorAll('nav.tabs button')
+        .forEach(b=>b.classList.toggle('active',b===btn));
+
+        document.querySelectorAll('.panel')
+        .forEach(p=>p.classList.remove('active'));
+
+        document
+        .getElementById('panel-'+state.tab)
+        .classList.add('active');
+
+        await renderActiveTab();
+
+    });
+
 });
 
 const selMonth = document.getElementById('selMonth');
