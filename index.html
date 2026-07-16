@@ -1722,20 +1722,63 @@ const loginScreen = document.getElementById("loginScreen");
 const btnLogin = document.getElementById("btnLogin");
 const txtPassword = document.getElementById("loginPassword");
 const loginError = document.getElementById("loginError");
+const LOGIN_DURATION = 60 * 60 * 1000; // 1 jam
 btnLogin.onclick = ()=>{
+
     if(txtPassword.value===APP_PASSWORD){
+
+        sessionStorage.setItem("masterbus_login_time", Date.now());
+
         loginScreen.style.display="none";
+
+        startSessionWatcher();
+
     }else{
+
         loginError.innerHTML="Password salah!";
+
         txtPassword.value="";
+
         txtPassword.focus();
+
     }
+
 };
 txtPassword.addEventListener("keypress",e=>{
     if(e.key==="Enter"){
         btnLogin.click();
     }
 });
+function logout(){
+
+    sessionStorage.removeItem("masterbus_login_time");
+
+    loginScreen.style.display="flex";
+
+    txtPassword.value="";
+
+    txtPassword.focus();
+
+    alert("Sesi login telah berakhir. Silakan login kembali.");
+
+}
+function startSessionWatcher(){
+
+    setInterval(()=>{
+
+        const loginTime = Number(sessionStorage.getItem("masterbus_login_time"));
+
+        if(!loginTime) return;
+
+        if(Date.now() - loginTime >= LOGIN_DURATION){
+
+            logout();
+
+        }
+
+    },10000);
+
+}
 const btnOT=document.getElementById("btnSaveOT");
 if(btnOT){
     btnOT.onclick=saveOvertime;
@@ -1791,6 +1834,23 @@ if(btnSaveAll){
         }
 
     };
+
+}
+const loginTime = Number(sessionStorage.getItem("masterbus_login_time"));
+
+if(loginTime){
+
+    if(Date.now() - loginTime < LOGIN_DURATION){
+
+        loginScreen.style.display = "none";
+
+        startSessionWatcher();
+
+    }else{
+
+        sessionStorage.removeItem("masterbus_login_time");
+
+    }
 
 }
 </script>
