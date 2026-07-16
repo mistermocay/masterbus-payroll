@@ -307,20 +307,7 @@ border-radius:16px;
 text-align:center;
 box-shadow:0 15px 40px rgba(0,0,0,.15);
 }
-.loading-spinner{
-width:50px;
-height:50px;
-margin:auto;
-border:5px solid #ddd;
-border-top:5px solid #2563eb;
-border-radius:50%;
-animation:spin 1s linear infinite;
-}
-@keyframes spin{
-100%{
-transform:rotate(360deg);
-}
-}
+
 /* Save Status */
 .save-status{
 
@@ -356,15 +343,50 @@ transform:rotate(360deg);
 
     transition:.25s;
 }
+.loading-logo{
+    width:72px;
+    height:72px;
+    display:block;
+    margin:0 auto 18px;
+    animation:logoSpin 2.2s linear infinite;
+    transform-origin:center center;
+}
+@keyframes logoSpin{
+    from{
+        transform:rotate(0deg);
+    }
+    to{
+        transform:rotate(360deg);
+    }
+}
+.loading-logo{
+
+    width:72px;
+
+    height:72px;
+
+    display:block;
+
+    margin:0 auto 18px;
+
+    animation:logoSpin 2.2s linear infinite;
+
+    filter:drop-shadow(0 8px 18px rgba(37,99,235,.25));
+
+}
 </style>
 </head>
 <body>
 <div id="loadingOverlay">
-<div class="loading-card">
-<div class="loading-spinner"></div>
-<h3>Menyimpan Data...</h3>
-<p>Mohon tunggu.</p>
-</div>
+    <div class="loading-card">
+        <img
+            src="https://i.vgy.me/MvdA1d.png"
+            class="loading-logo"
+            alt="Loading"
+        >
+        <h3>Menyimpan Data...</h3>
+        <p>Mohon tunggu.</p>
+    </div>
 </div>
 <div id="loginScreen">
 
