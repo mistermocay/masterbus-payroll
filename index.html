@@ -609,6 +609,7 @@ const RULES = [
 
 let employees = [];
 let isSaving = false;
+let isDirty = false;
 let attendance = {}; // { "YYYY-M": { empId: { day: {kode,lb,lm} } } }
 let state = { tab:'karyawan', month: 7, year: 2026, absMode:'kehadiran', editingEmpId:null, empBulananId:null, empUMId:null, umPeriodIdx:0 };
 
@@ -698,10 +699,68 @@ function showLoading(){
     document.getElementById("loadingOverlay").style.display="flex";
 
 }
+async function saveCurrentTab(){
+
+    if(state.tab==="karyawan"){
+
+        await saveEmployees(employees);
+
+    }
+
+    else if(state.tab==="absensi"){
+
+        const mk = monthKey(state.year,state.month);
+
+        await saveAttendanceData(
+            mk,
+            attendance[mk] || {}
+        );
+
+    }
+
+    else if(state.tab==="lembur"){
+
+        // lembur sudah otomatis save
+        return;
+
+    }
+
+    isDirty=false;
+
+}
 
 function hideLoading(){
 
     document.getElementById("loadingOverlay").style.display="none";
+
+}
+async function saveCurrentTab(){
+
+    if(state.tab==="karyawan"){
+
+        await saveEmployees(employees);
+
+    }
+
+    else if(state.tab==="absensi"){
+
+        const mk = monthKey(state.year,state.month);
+
+        await saveAttendanceData(
+            mk,
+            attendance[mk] || {}
+        );
+
+    }
+
+    else if(state.tab==="lembur"){
+
+        // lembur sudah otomatis save
+        return;
+
+    }
+
+    isDirty=false;
 
 }
 /* ============================= HELPERS ============================= */
@@ -944,12 +1003,46 @@ document.querySelectorAll('nav.tabs button').forEach(btn=>{
 
         }
 
-        state.tab = btn.dataset.tab;
+        if(isDirty){
 
-        document.querySelectorAll('nav.tabs button')
+            const simpan = confirm(
+
+                "Ada perubahan yang belum disimpan.\n\nSimpan sebelum pindah tab?"
+
+            );
+
+            if(simpan){
+
+                isSaving=true;
+
+                showLoading();
+
+                try{
+
+                    await saveCurrentTab();
+
+                }
+
+                finally{
+
+                    hideLoading();
+
+                    isSaving=false;
+
+                }
+
+            }
+
+        }
+
+        state.tab=btn.dataset.tab;
+
+        document
+        .querySelectorAll('nav.tabs button')
         .forEach(b=>b.classList.toggle('active',b===btn));
 
-        document.querySelectorAll('.panel')
+        document
+        .querySelectorAll('.panel')
         .forEach(p=>p.classList.remove('active'));
 
         document
@@ -1171,17 +1264,48 @@ function renderAbsensi(){
   });
 }
 function onAttChange(e){
-  const el = e.target;
-  const empId = el.dataset.emp, day = +el.dataset.day, field = el.dataset.field;
-  const rec = getAttRec(state.year, state.month, empId, day);
-  if(field==='kode') rec.kode = el.value;
-  else rec[field] = Number(el.value||0);
-  saveAttendance(state.year, state.month);
-  if(field==='kode'){
-    const td = el.closest('td');
-    td.className = td.className.replace(/code-\S+/g,'').trim();
-    if(el.value) td.classList.add('code-'+el.value);
-  }
+
+    const el = e.target;
+
+    const empId = el.dataset.emp;
+
+    const day = +el.dataset.day;
+
+    const field = el.dataset.field;
+
+    const rec = getAttRec(
+        state.year,
+        state.month,
+        empId,
+        day
+    );
+
+    if(field==="kode")
+        rec.kode = el.value;
+    else
+        rec[field] = Number(el.value||0);
+
+    // ============================
+    // ADA PERUBAHAN DATA
+    // ============================
+    isDirty = true;
+
+    saveAttendance(
+        state.year,
+        state.month
+    );
+
+    if(field==="kode"){
+
+        const td = el.closest("td");
+
+        td.className = td.className.replace(/code-\S+/g,"").trim();
+
+        if(el.value)
+            td.classList.add("code-"+el.value);
+
+    }
+
 }
 
 /* ============================= SLIP BULANAN TAB ============================= */
