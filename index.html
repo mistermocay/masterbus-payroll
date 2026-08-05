@@ -693,7 +693,23 @@ let isSaving = false;
 let savePromise = null;
 let isDirty = false;
 let attendance = {}; // { "YYYY-M": { empId: { day: {kode,lb,lm} } } }
-let state = { tab:'karyawan', month: 7, year: 2026, absMode:'kehadiran', editingEmpId:null, empBulananId:null, empUMId:null, umPeriodIdx:0 };
+
+const NOW = new Date();
+let state = {
+    tab:'karyawan',
+
+    month:NOW.getMonth()+1,
+
+    year:NOW.getFullYear(),
+
+    absMode:'kehadiran',
+
+    editingEmpId:null,
+
+    empBulananId:null,
+
+    umPeriodIdx:0
+};
 
 const SEED_EMPLOYEES = [
  ["Fitriah Afifah Noor","Maybank","8.746.935.140","PURCHASING",4200000,117500,75000,20000],
