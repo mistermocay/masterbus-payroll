@@ -458,12 +458,13 @@ backdrop-filter:blur(2px);
   <nav class="tabs">
     <button data-tab="karyawan" class="active">Karyawan</button>
     <button data-tab="absensi">Absensi</button>
-    <button data-tab="lembur">PERCOBAAN INPUT LEMBUR</button>
+    <button data-tab="lembur">Input Lembur</button>
     <button data-tab="slipBulanan">Slip Gaji Bulanan</button>
     <button data-tab="slipUM">Slip Uang Makan + Lembur</button>
     <button data-tab="rekapUM">Rekapan Mingguan</button>
     <button data-tab="rekap">Rekap</button>
     <button data-tab="readme">Aturan</button>
+    <button data-tab="titipan">Titipan Potongan</button>
   </nav>
 
   <!-- KARYAWAN -->
@@ -551,6 +552,110 @@ border-radius:8px;
 display:none;">
 </div>
 </div>
+</section>
+
+<section class="panel" id="panel-titipan">
+
+<div class="card card-pad">
+
+<h2 class="section-title">
+Titipan Potongan Alpha
+</h2>
+
+<p class="section-sub">
+Digunakan apabila Alpha bulan sebelumnya belum sempat dipotong.
+</p>
+
+<div class="grid-2">
+
+<div class="field">
+
+<label>Karyawan</label>
+
+<select id="adjEmp"></select>
+
+</div>
+
+<div class="field">
+
+<label>Tanggal Alpha</label>
+
+<input type="date" id="adjDate">
+
+</div>
+
+</div>
+
+<div class="field">
+
+<label>Keterangan</label>
+
+<input
+id="adjNote"
+placeholder="Misal : Alpha Juli belum terinput">
+
+</div>
+
+<button
+class="btn btn-primary"
+id="btnAddAdjustment">
+
+➕ Tambahkan Titipan
+
+</button>
+
+</div>
+
+<br>
+
+<div class="card card-pad">
+
+<h2 class="section-title">
+Daftar Titipan
+</h2>
+
+<div class="tbl-wrap">
+
+<table class="tbl">
+
+<thead>
+
+<tr>
+
+<th>Nama</th>
+
+<th>Tanggal Alpha</th>
+
+<th>Potongan</th>
+
+<th>Keterangan</th>
+
+<th>Aksi</th>
+
+</tr>
+
+</thead>
+
+<tbody id="adjustmentBody">
+
+<tr>
+
+<td colspan="5">
+
+Belum ada titipan.
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
 </section>
 
   <!-- SLIP BULANAN -->
