@@ -183,3 +183,61 @@ window.savePayroll = async function (key, payroll) {
 
 
 console.log("DATABASE CONNECTED");
+/* ===========================================================
+   ADJUSTMENTS (TITIPAN POTONGAN)
+=========================================================== */
+
+window.loadAdjustments = async function () {
+
+    try {
+
+        const snap = await getDoc(
+
+            doc(db, "master", "adjustments")
+
+        );
+
+        if (!snap.exists()) return [];
+
+        return snap.data().items || [];
+
+    }
+
+    catch (err) {
+
+        console.error(err);
+
+        return [];
+
+    }
+
+}
+
+
+window.saveAdjustments = async function (items) {
+
+    try {
+
+        await setDoc(
+
+            doc(db, "master", "adjustments"),
+
+            {
+
+                items,
+
+                updatedAt: Date.now()
+
+            }
+
+        );
+
+    }
+
+    catch (err) {
+
+        console.error(err);
+
+    }
+
+}
