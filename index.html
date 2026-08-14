@@ -2185,9 +2185,120 @@ function renderLaporanBulanan(){
         </tr>
         `;
 }
-document
-    .getElementById("btnPrintLaporanBulanan")
-    .addEventListener("click", printLaporanBulanan);
+
+    function printLaporanBulanan(){
+    const table =
+        document.getElementById(
+            "tblLaporanBulanan"
+        );
+    if(!table) return;
+    const periode =
+        BULAN_ID[state.month-1] +
+        " " +
+        state.year;
+    const w =
+        window.open(
+            "",
+            "_blank"
+        );
+    w.document.write(`
+<!DOCTYPE html>
+<html>
+<head>
+<title>
+Laporan Pencairan Gaji ${periode}
+</title>
+<style>
+@page{
+    size:landscape;
+    margin:12mm;
+}
+body{
+    font-family:Arial,sans-serif;
+    padding:20px;
+    color:#111;
+}
+h2{
+    text-align:center;
+    margin:0;
+}
+h3{
+    text-align:center;
+    margin:5px 0 20px;
+}
+.info{
+    text-align:center;
+    font-size:12px;
+    margin-bottom:15px;
+}
+table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:10px;
+}
+th,
+td{
+    border:1px solid #333;
+    padding:6px;
+}
+th{
+    background:#e8eef8;
+    text-align:center;
+}
+td{
+    vertical-align:middle;
+}
+.num{
+    text-align:right;
+}
+.total{
+    font-weight:bold;
+    background:#eef6ff;
+}
+.footer{
+    margin-top:20px;
+    font-size:11px;
+}
+</style>
+</head>
+<body>
+<h2>
+PT MASTER ARTHA KHARISMA
+</h2>
+<h3>
+LAPORAN PENCAIRAN GAJI BULANAN
+</h3>
+<div class="info">
+Periode:
+<strong>
+${periode}
+</strong>
+&nbsp;&nbsp; | &nbsp;&nbsp;
+Tanggal Cetak:
+<strong>
+${new Date().toLocaleDateString("id-ID")}
+</strong>
+</div>
+${table.outerHTML}
+</body>
+</html>
+    `);
+    w.document.close();
+    w.onload = function(){
+        w.print();
+    };
+}
+const btnPrintLaporanBulanan =
+    document.getElementById("btnPrintLaporanBulanan");
+
+if(btnPrintLaporanBulanan){
+
+    btnPrintLaporanBulanan.addEventListener(
+        "click",
+        printLaporanBulanan
+    );
+
+}
 /* ============================= README TAB ============================= */
 function renderReadme(){
   document.getElementById('ruleList').innerHTML = RULES.map((r,i)=>
