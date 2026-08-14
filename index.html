@@ -718,10 +718,19 @@ Belum ada titipan.
     <div class="tbl-wrap card">
       <table class="tbl">
         <thead>
-          <tr>
-            <th>Nama</th><th>Bagian</th><th>Jumlah Hari Uang Makan</th><th>Jumlah Jam Lembur</th><th>Jumlah Jam Lembur Hari Libur</th>
-            <th>Uang Makan</th><th>Lembur</th><th>Lembur Hari Libur</th><th>Total</th>
-          </tr>
+    <tr>
+        <th>Nama</th>
+        <th>Bagian</th>
+        <th>Bank</th>
+        <th>No. Rekening</th>
+        <th>Jumlah Hari Uang Makan</th>
+        <th>Jumlah Jam Lembur</th>
+        <th>Jumlah Jam Lembur Hari Libur</th>
+        <th>Uang Makan</th>
+        <th>Lembur</th>
+        <th>Lembur Hari Libur</th>
+        <th>Total</th>
+    </tr>
         </thead>
         <tbody id="weeklyRekapBody"></tbody>
       </table>
@@ -2320,8 +2329,10 @@ function renderRekapUM(){
     const total=c.uangMakan+c.lemburBiasaRp+c.lemburMerahRp;
     tu+=c.uangMakan; tl+=c.lemburBiasaRp; tlm+=c.lemburMerahRp; tt+=total;
     body+=`<tr>
-      <td>${emp.name}</td>
-      <td>${emp.bagian}</td>
+      <td><strong>${esc(emp.name)}</strong></td>
+      <td><span class="tag">${esc(emp.bagian)}</span></td>
+      <td>${esc(emp.bankName)}</td>
+      <td class="mono">${esc(emp.rekening)}</td>
       <td class="num">${c.cUM}</td>
       <td class="num">${c.jamLB}</td>
       <td class="num">${c.jamLM}</td>
@@ -2332,11 +2343,12 @@ function renderRekapUM(){
     </tr>`;
   });
   body+=`<tr style="font-weight:bold;background:#eef6f3">
-  <td colspan="5">TOTAL</td>
+  <td colspan="7">TOTAL</td>
   <td class="num">${rupiah(tu)}</td>
   <td class="num">${rupiah(tl)}</td>
   <td class="num">${rupiah(tlm)}</td>
-  <td class="num">${rupiah(tt)}</td></tr>`;
+  <td class="num">${rupiah(tt)}</td>
+  </tr>`;
   document.getElementById('weeklyRekapBody').innerHTML=body;
 }
 function renderAdjustments(){
