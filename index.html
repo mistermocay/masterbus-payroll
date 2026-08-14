@@ -559,14 +559,33 @@ display:none;">
 <div class="card card-pad">
 
 <h2 class="section-title">
-Titipan Potongan Alpha
+Titipan Potongan
 </h2>
 
 <p class="section-sub">
-Digunakan apabila Alpha bulan sebelumnya belum sempat dipotong.
+Digunakan apabila potongan Alpha atau Terlambat dari periode sebelumnya
+belum sempat dipotong.
 </p>
 
 <div class="grid-2">
+
+<div class="field">
+
+<label>Jenis Potongan</label>
+
+<select id="adjType">
+
+<option value="alpha">
+Alpha
+</option>
+
+<option value="terlambat">
+Terlambat
+</option>
+
+</select>
+
+</div>
 
 <div class="field">
 
@@ -576,11 +595,23 @@ Digunakan apabila Alpha bulan sebelumnya belum sempat dipotong.
 
 </div>
 
+</div>
+
+<div class="grid-2">
+
 <div class="field">
 
-<label>Tanggal Alpha</label>
+<label>Tanggal Kejadian</label>
 
 <input type="date" id="adjDate">
+
+</div>
+
+<div class="field">
+
+<label>Periode Potong</label>
+
+<select id="adjPayrollMonth"></select>
 
 </div>
 
@@ -592,7 +623,7 @@ Digunakan apabila Alpha bulan sebelumnya belum sempat dipotong.
 
 <input
 id="adjNote"
-placeholder="Misal : Alpha Juli belum terinput">
+placeholder="Misal: Alpha Juli belum terinput">
 
 </div>
 
@@ -621,8 +652,9 @@ Daftar Titipan
 <thead>
 
 <tr>
+<th>Jenis</th>
 <th>Nama</th>
-<th>Tanggal Alpha</th>
+<th>Tanggal Kejadian</th>
 <th>Periode Potong</th>
 <th>Potongan</th>
 <th>Keterangan</th>
@@ -635,7 +667,7 @@ Daftar Titipan
 
 <tr>
 
-<td colspan="6">
+<td colspan="7">
 
 Belum ada titipan.
 
@@ -1148,17 +1180,40 @@ function calcMonthly(emp,y,m){
   const dim = daysInMonth(y,m);
   const c = calcRange(emp,y,m,1,dim);
   // Slip bulanan TIDAK memasukkan UM maupun lembur karena dibayarkan mingguan
-  // =============================
-// Titipan Potongan Alpha
-// =============================
-  const adj = adjustments.filter(a=>
-    a.empId===emp.id &&
-    a.payrollKey===monthKey(y,m)
+// ==============================
+// TITIPAN POTONGAN
+// ==============================
+const adj = adjustments.filter(a =>
+    a.empId === emp.id &&
+    a.payrollKey === monthKey(y,m)
 );
-  const potTitipan = adj.reduce(
-    (t)=>t + dailyRate(emp),
-    0
-);
+// ==============================
+// TITIPAN ALPHA
+// ==============================
+const potTitipanAlpha = adj.reduce((total, a) => {
+    const type = a.type || "alpha";
+    if(type === "alpha"){
+        return total + dailyRate(emp);
+    }
+    return total;
+}, 0);
+// ==============================
+// TITIPAN TERLAMBAT
+// ==============================
+const potTitipanTerlambat = adj.reduce((total, a) => {
+    const type = a.type || "alpha";
+    if(type === "terlambat"){
+        return total +
+            (Number(emp.potTerlambatRate) || 0);
+    }
+    return total;
+}, 0);
+// ==============================
+// TOTAL TITIPAN
+// ==============================
+const potTitipan =
+    potTitipanAlpha +
+    potTitipanTerlambat;
   const total =
     emp.gajiPokok
     - emp.bpjs
@@ -1169,7 +1224,9 @@ function calcMonthly(emp,y,m){
   return Object.assign(
     {
         total,
-        potTitipan
+        potTitipan,
+        potTitipanAlpha,
+        potTitipanTerlambat
     },
     c
 );
@@ -1535,6 +1592,20 @@ function populateAdjustmentSelect(){
             ${esc(e.name)} — ${esc(e.bagian)}
         </option>
     `).join("");
+
+    const payrollMonth =
+        document.getElementById("adjPayrollMonth");
+    if(!payrollMonth) return;
+    payrollMonth.innerHTML = BULAN_ID.map((nama,index)=>{
+        const month = index + 1;
+        return `
+            <option value="${month}">
+                ${nama} ${state.year}
+            </option>
+        `;
+    }).join("");
+
+    payrollMonth.value = state.month;
 }
 const ot = document.getElementById("otEmp");
 
@@ -1625,18 +1696,35 @@ function slipBulananHTML(emp, c){
         </div>
       </div>
       ${
-        c.potTitipan>0
-        ?`
-        <div class="slip-line">
-            <div class="lbl">
-                Potongan Titipan Alpha
-            </div>
-            <div class="val neg">
-                -${rupiah(c.potTitipan)}
-            </div>
+    c.potTitipanAlpha > 0
+    ?`
+    <div class="slip-line">
+
+        <div class="lbl">
+            Potongan Titipan Alpha
         </div>
-        `
-        :""
+
+        <div class="val neg">
+            -${rupiah(c.potTitipanAlpha)}
+        </div>
+
+    </div>
+    `
+    :""
+}
+      ${
+          c.potTitipanTerlambat > 0
+          ?`
+          <div class="slip-line">
+              <div class="lbl">
+                  Potongan Titipan Terlambat
+              </div>
+              <div class="val neg">
+                  -${rupiah(c.potTitipanTerlambat)}
+              </div>
+          </div>
+          `
+          :""
       }
       <div class="slip-line sub">
         <div class="lbl">Ket. absensi lain</div>
@@ -1885,36 +1973,87 @@ function renderRekapUM(){
 function renderAdjustments(){
     populateEmpSelects();
     populateAdjustmentSelect();
-    const tbody = document.getElementById("adjustmentBody");
+    const tbody =
+        document.getElementById("adjustmentBody");
     if(!tbody) return;
-    if(adjustments.length===0){
-        tbody.innerHTML=`
+    if(adjustments.length === 0){
+        tbody.innerHTML = `
         <tr>
-            <td colspan="6">
+            <td colspan="7">
                 Belum ada titipan.
             </td>
         </tr>`;
         return;
     }
-    tbody.innerHTML = adjustments.map(a=>{
-        const emp = employees.find(e=>e.id===a.empId);
-        const pot = emp ? dailyRate(emp) : 0;
+    tbody.innerHTML = adjustments.map(a => {
+        const emp =
+            employees.find(e => e.id === a.empId);
+        // ==============================
+        // DATA LAMA = ALPHA
+        // ==============================
+        const type =
+            a.type || "alpha";
+        const eventDate =
+            a.eventDate || a.alphaDate;
+        // ==============================
+        // NOMINAL
+        // ==============================
+        let pot = 0;
+        if(emp){
+            if(type === "terlambat"){
+                pot =
+                    Number(emp.potTerlambatRate) || 0;
+            }else{
+                pot =
+                    dailyRate(emp);
+            }
+        }
+        // ==============================
+        // PERIODE POTONG
+        // ==============================
         let periode = "-";
         if(a.payrollKey){
-            const [y,m] = a.payrollKey.split("-");
-            periode = `${BULAN_ID[Number(m)-1]} ${y}`;
+            const [y,m] =
+                a.payrollKey.split("-");
+            periode =
+                `${BULAN_ID[Number(m)-1]} ${y}`;
         }
+        // ==============================
+        // LABEL JENIS
+        // ==============================
+        const jenis =
+            type === "terlambat"
+            ? `<span class="tag">
+                Terlambat
+              </span>`
+            : `<span class="tag">
+                Alpha
+              </span>`;
         return `
         <tr>
-            <td>${emp ? esc(emp.name) : "-"}</td>
-            <td>${a.alphaDate}</td>
+            <td>
+                ${jenis}
+            </td>
+            <td>
+                ${emp
+                    ? esc(emp.name)
+                    : "-"
+                }
+            </td>
+            <td>
+                ${eventDate || "-"}
+            </td>
             <td>
                 <span class="tag">
-                    ${periode}
+                    📅 ${periode}
                 </span>
             </td>
-            <td>${rupiah(pot)}</td>
-            <td>${esc(a.note || "-")}</td>
+            <td>
+                ${rupiah(pot)}
+            </td>
+            <td>
+                ${esc(a.note || "-")}
+            </td>
             <td>
                 <button
                     class="btn btn-danger btn-sm"
@@ -1922,46 +2061,117 @@ function renderAdjustments(){
                     Hapus
                 </button>
             </td>
-        </tr>`;
+        </tr>
+        `;
     }).join("");
 }
 async function addAdjustment(){
+    const type = document.getElementById("adjType").value;
     const empId = document.getElementById("adjEmp").value;
-    const alphaDate = document.getElementById("adjDate").value;
+    const eventDate = document.getElementById("adjDate").value;
+    const payrollMonth = Number(
+        document.getElementById("adjPayrollMonth").value
+    );
     const note = document.getElementById("adjNote").value.trim();
+    // ==============================
+    // VALIDASI
+    // ==============================
     if(!empId){
         alert("Pilih karyawan.");
         return;
     }
-    if(!alphaDate){
-        alert("Pilih tanggal Alpha.");
+    if(!eventDate){
+        alert(
+            type === "terlambat"
+            ? "Pilih tanggal terlambat."
+            : "Pilih tanggal Alpha."
+        );
         return;
     }
-    // Cek data duplikat
-    const exists = adjustments.find(a=>
-        a.empId===empId &&
-        a.alphaDate===alphaDate &&
-        a.payrollKey===monthKey(state.year,state.month)
-    );
-    if(exists){
-        alert("Tanggal Alpha tersebut sudah dititipkan pada periode ini.");
+    if(!payrollMonth){
+        alert("Pilih periode potong.");
         return;
     }
-    showLoading("Menyimpan Titipan...");
-    adjustments.push({
-        id:"adj_"+Date.now(),
-        empId,
-        alphaDate,
-        payrollKey:monthKey(state.year,state.month),
-        note,
-        createdAt:Date.now()
+    // ==============================
+    // CEK DUPLIKAT
+    // ==============================
+    const exists = adjustments.find(a => {
+        const oldType =
+            a.type || "alpha";
+        const oldDate =
+            a.eventDate || a.alphaDate;
+        return (
+            oldType === type &&
+            a.empId === empId &&
+            oldDate === eventDate &&
+            a.payrollKey === monthKey(
+                state.year,
+                payrollMonth
+            )
+        );
     });
-    await saveAdjustments(adjustments);
-    hideLoading();
-    renderAdjustments();
-    document.getElementById("adjDate").value="";
-    document.getElementById("adjNote").value="";
-    showToast("Titipan berhasil ditambahkan.");
+    if(exists){
+        alert(
+            type === "terlambat"
+            ? "Tanggal terlambat tersebut sudah dititipkan untuk periode potong tersebut."
+            : "Tanggal Alpha tersebut sudah dititipkan untuk periode potong tersebut."
+        );
+        return;
+    }
+    // ==============================
+    // LOADING
+    // ==============================
+    showLoading(
+        type === "terlambat"
+        ? "Menyimpan Titipan Terlambat..."
+        : "Menyimpan Titipan Alpha..."
+    );
+    try{
+        // ==============================
+        // SIMPAN DATA
+        // ==============================
+        adjustments.push({
+            id: "adj_" + Date.now(),
+            type: type,
+            empId: empId,
+            eventDate: eventDate,
+            payrollKey: monthKey(
+                state.year,
+                payrollMonth
+            ),
+            note: note,
+            createdAt: Date.now()
+        });
+        // ==============================
+        // SAVE FIREBASE
+        // ==============================
+        await saveAdjustments(adjustments);
+        // ==============================
+        // REFRESH DATA
+        // ==============================
+        adjustments = await loadAdjustments();
+        renderAdjustments();
+        // ==============================
+        // INFO
+        // ==============================
+        showToast(
+            type === "terlambat"
+            ? "Titipan terlambat berhasil disimpan."
+            : "Titipan Alpha berhasil disimpan."
+        );
+        // kosongkan keterangan
+        document.getElementById("adjNote").value = "";
+        document.getElementById("adjDate").value = "";
+    }
+    catch(err){
+        console.error(err);
+        alert(
+            "Gagal menyimpan titipan. Silakan coba lagi."
+        );
+    }
+    finally{
+        hideLoading();
+    }
 }
 async function deleteAdjustment(id){
     if(!confirm("Hapus titipan ini?")) return;
