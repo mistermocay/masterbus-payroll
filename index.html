@@ -463,6 +463,7 @@ backdrop-filter:blur(2px);
     <button data-tab="slipUM">Slip Uang Makan + Lembur</button>
     <button data-tab="rekapUM">Rekapan Mingguan</button>
     <button data-tab="rekap">Rekap</button>
+    <button data-tab="laporanBulanan">Laporan Bulanan</button>
     <button data-tab="readme">Aturan</button>
     <button data-tab="titipan">Titipan Potongan</button>
   </nav>
@@ -743,6 +744,68 @@ Belum ada titipan.
       </table>
     </div>
   </section>
+
+  <!-- LAPORAN BULANAN -->
+<section class="panel" id="panel-laporanBulanan">
+    <div class="row-between" style="margin-bottom:16px;">
+        <div>
+            <h2 class="section-title">
+                Laporan Pencairan Gaji Bulanan
+                <span id="laporanBulananMonthLabel"></span>
+            </h2>
+            <p class="section-sub">
+                Laporan pencairan gaji bulanan kepada kantor pusat.
+                Tidak termasuk uang makan dan lembur.
+            </p>
+        </div>
+        <button
+            class="btn btn-primary"
+            id="btnPrintLaporanBulanan">
+            🖨 Cetak Laporan
+        </button>
+    </div>
+    <div class="tbl-wrap card">
+        <table class="tbl" id="tblLaporanBulanan">
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Nama</th>
+                    <th>Bagian</th>
+                    <th>Bank</th>
+                    <th>Rekening</th>
+                    <th class="num">
+                        Gaji Pokok
+                    </th>
+                    <th class="num">
+                        BPJS
+                    </th>
+                    <th class="num">
+                        Pot. Alpha
+                    </th>
+                    <th class="num">
+                        Pot. Terlambat
+                    </th>
+                    <th class="num">
+                        Pot. Setengah Hari
+                    </th>
+                    <th class="num">
+                        Titipan Alpha
+                    </th>
+                    <th class="num">
+                        Titipan Terlambat
+                    </th>
+                    <th class="num">
+                        Total Potongan
+                    </th>
+                    <th class="num">
+                        Take Home
+                    </th>
+                </tr>
+            </thead>
+            <tbody id="laporanBulananBody"></tbody>
+        </table>
+    </div>
+</section>
 
   <!-- README -->
   <section class="panel" id="panel-readme">
@@ -1332,8 +1395,12 @@ async function renderActiveTab(){
         renderRekapUM();
     }
     else if(state.tab==='rekap'){
+    await loadAttendance(state.year,state.month);
+    renderRekap();
+    }
+    else if(state.tab==='laporanBulanan'){
         await loadAttendance(state.year,state.month);
-        renderRekap();
+        renderLaporanBulanan();
     }
     else if(state.tab==='readme'){
         renderReadme();
@@ -1929,7 +1996,198 @@ function renderRekap(){
     <div class="kpi"><div class="kpi-label">Total Take Home Pay</div><div class="kpi-val">${rupiah(totalTHP)}</div></div>
   `;
 }
-
+/* ============================= LAPORAN BULANAN ============================= */
+function renderLaporanBulanan(){
+    const label =
+        document.getElementById("laporanBulananMonthLabel");
+    const tbody =
+        document.getElementById("laporanBulananBody");
+    if(!label || !tbody) return;
+    label.textContent =
+        "— " +
+        BULAN_ID[state.month-1] +
+        " " +
+        state.year;
+    if(!employees.length){
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="14">
+                    <div class="empty-state">
+                        <div class="em-ic">📊</div>
+                        Belum ada data karyawan.
+                    </div>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    let totalGaji = 0;
+    let totalBpjs = 0;
+    let totalAlpha = 0;
+    let totalTerlambat = 0;
+    let totalSetengahHari = 0;
+    let totalTitipanAlpha = 0;
+    let totalTitipanTerlambat = 0;
+    let totalPotongan = 0;
+    let totalTakeHome = 0;
+    const rows = employees.map((emp,index)=>{
+        const c =
+            calcMonthly(
+                emp,
+                state.year,
+                state.month
+            );
+        /*
+         * POTONGAN BULAN BERJALAN
+         */
+        const potBpjs =
+            Number(emp.bpjs) || 0;
+        const potAlpha =
+            c.potTidakMasuk;
+        const potTerlambat =
+            c.potTerlambat;
+        const potSetengahHari =
+            c.potSetengahHari;
+        /*
+         * TITIPAN PERIODE SEBELUMNYA
+         */
+        const titipanAlpha =
+            c.potTitipanAlpha;
+        const titipanTerlambat =
+            c.potTitipanTerlambat;
+        /*
+         * TOTAL POTONGAN
+         */
+        const totalPot =
+            potBpjs +
+            potAlpha +
+            potTerlambat +
+            potSetengahHari +
+            titipanAlpha +
+            titipanTerlambat;
+        /*
+         * TAKE HOME PAY
+         *
+         * Tidak memasukkan:
+         * - Uang Makan
+         * - Lembur
+         */
+        const takeHome =
+            emp.gajiPokok -
+            totalPot;
+        /*
+         * TOTAL
+         */
+        totalGaji += emp.gajiPokok;
+        totalBpjs += potBpjs;
+        totalAlpha += potAlpha;
+        totalTerlambat += potTerlambat;
+        totalSetengahHari += potSetengahHari;
+        totalTitipanAlpha += titipanAlpha;
+        totalTitipanTerlambat += titipanTerlambat;
+        totalPotongan += totalPot;
+        totalTakeHome += takeHome;
+        return `
+        <tr>
+            <td>
+                ${index + 1}
+            </td>
+            <td>
+                <strong>
+                    ${esc(emp.name)}
+                </strong>
+            </td>
+            <td>
+                <span class="tag">
+                    ${esc(emp.bagian)}
+                </span>
+            </td>
+            <td>
+                ${esc(emp.bankName)}
+            </td>
+            <td class="mono">
+                ${esc(emp.rekening)}
+            </td>
+            <td class="num">
+                ${rupiah(emp.gajiPokok)}
+            </td>
+            <td class="num" style="color:var(--red)">
+                -${rupiah(potBpjs)}
+            </td>
+            <td class="num" style="color:var(--red)">
+                -${rupiah(potAlpha)}
+            </td>
+            <td class="num" style="color:var(--red)">
+                -${rupiah(potTerlambat)}
+            </td>
+            <td class="num" style="color:var(--red)">
+                -${rupiah(potSetengahHari)}
+            </td>
+            <td class="num" style="color:var(--red)">
+                -${rupiah(titipanAlpha)}
+            </td>
+            <td class="num" style="color:var(--red)">
+                -${rupiah(titipanTerlambat)}
+            </td>
+            <td class="num" style="color:var(--red);font-weight:700">
+                -${rupiah(totalPot)}
+            </td>
+            <td class="num">
+                <strong>
+                    ${rupiah(takeHome)}
+                </strong>
+            </td>
+        </tr>
+        `;
+    }).join("");
+    /*
+     * BARIS TOTAL
+     */
+    tbody.innerHTML =
+        rows +
+        `
+        <tr
+            style="
+                font-weight:700;
+                background:#eef6ff;
+            "
+        >
+            <td colspan="5">
+                TOTAL
+            </td>
+            <td class="num">
+                ${rupiah(totalGaji)}
+            </td>
+            <td class="num">
+                -${rupiah(totalBpjs)}
+            </td>
+            <td class="num">
+                -${rupiah(totalAlpha)}
+            </td>
+            <td class="num">
+                -${rupiah(totalTerlambat)}
+            </td>
+            <td class="num">
+                -${rupiah(totalSetengahHari)}
+            </td>
+            <td class="num">
+                -${rupiah(totalTitipanAlpha)}
+            </td>
+            <td class="num">
+                -${rupiah(totalTitipanTerlambat)}
+            </td>
+            <td class="num">
+                -${rupiah(totalPotongan)}
+            </td>
+            <td class="num">
+                ${rupiah(totalTakeHome)}
+            </td>
+        </tr>
+        `;
+}
+document
+    .getElementById("btnPrintLaporanBulanan")
+    .addEventListener("click", printLaporanBulanan);
 /* ============================= README TAB ============================= */
 function renderReadme(){
   document.getElementById('ruleList').innerHTML = RULES.map((r,i)=>
