@@ -163,7 +163,14 @@
   table.att td select:focus, table.att td input:focus{outline:2px solid var(--teal);outline-offset:-2px;background:#fff;}
   table.att td.code-T select{color:var(--amber);font-weight:700;}
   table.att td.code-A select{color:var(--red);font-weight:700;}
-  table.att td.code-SH select, table.att td.code-SD select, table.att td.code-DL select, table.att td.code-CT select{color:var(--teal);font-weight:700;}
+  table.att td.code-SH select,
+    table.att td.code-SD select,
+    table.att td.code-LN select,
+    table.att td.code-DL select,
+    table.att td.code-CT select{
+        color:var(--teal);
+        font-weight:700;
+    }
 
   .legend{display:flex;flex-wrap:wrap;gap:10px 18px;font-size:11.5px;color:var(--ink-soft);margin-top:12px;}
   .legend span b{color:var(--ink);}
@@ -875,6 +882,7 @@ const KODE_LIST = [
   {v:'SH', label:'SH — Setengah Hari'},
   {v:'A', label:'A — Alpha'},
   {v:'SD', label:'SD — Surat Dokter'},
+  {v:'LN', label:'LN — Libur Nasional'},
   {v:'DL', label:'DL — Dinas Luar'},
   {v:'CT', label:'CT — Cuti'},
 ];
@@ -883,11 +891,11 @@ const RULES = [
  "Closing payroll dilakukan setiap hari Jumat.",
  "Periode UM/Lembur/LM selalu dimulai tanggal 1 setiap bulan.",
  "Setelah Jumat (closing), hari Sabtu otomatis masuk periode berikutnya.",
- "Kode absensi: T=Terlambat, SH=Setengah Hari, A=Alpha, SD=Surat Dokter, DL=Dinas Luar, CT=Cuti.",
+ "Kode absensi: T=Terlambat, SH=Setengah Hari, A=Alpha, SD=Surat Dokter, LN=Libur Nasional, DL=Dinas Luar, CT=Cuti.",
  "T mendapat Uang Makan &amp; gaji penuh, potongan Rp10.000/kejadian.",
  "SH mendapat Uang Makan, potongan 1/2 hari gaji.",
  "A dipotong 1 hari gaji dan tidak mendapat Uang Makan.",
- "SD/DL/CT mendapat gaji penuh tetapi tidak mendapat Uang Makan.",
+ "SD/LN/DL/CT mendapat gaji penuh tetapi tidak mendapat Uang Makan.",
  "Lembur hari kerja = Rp20.000/jam.",
  "Lembur hari libur/tanggal merah = ((Gaji Pokok/26)×2)/8 per jam.",
 ];
@@ -1087,20 +1095,40 @@ function getAttRec(y,m,empId,day){
 function calcRange(emp,y,m,start,end){
   const mk = monthKey(y,m);
   const empAtt = (attendance[mk]||{})[emp.id] || {};
-  let cT=0,cSH=0,cA=0,cSD=0,cDL=0,cCT=0,cUM=0,jamLB=0,jamLM=0;
+  let cT=0,cSH=0,cA=0,cSD=0,cLN=0,cDL=0,cCT=0,cUM=0,jamLB=0,jamLM=0;
   for(let d=start; d<=end; d++){
     const rec = empAtt[d] || {kode:'',lb:0,lm:0};
     const dow = new Date(y,m-1,d).getDay();
     if(dow!==0){
       switch(rec.kode){
-        case 'T': cT++; cUM++; break;
-        case 'SH': cSH++; cUM++; break;
-        case 'A': cA++; break;
-        case 'SD': cSD++; break;
-        case 'DL': cDL++; cUM++; break;
-        case 'CT': cCT++; break;
-        default: cUM++; break;
-      }
+    case 'T':
+        cT++;
+        cUM++;
+        break;
+    case 'SH':
+        cSH++;
+        cUM++;
+        break;
+    case 'A':
+        cA++;
+        break;
+    case 'SD': 
+        cSD++; 
+        break;
+    case 'LN':
+        cLN++;
+        break;
+    case 'DL': 
+        cDL++; 
+        cUM++; 
+        break;
+    case 'CT':
+        cCT++;
+        break;
+    default:
+        cUM++;
+        break;
+}
     }
     jamLB += Number(rec.lb||0);
     jamLM += Number(rec.lm||0);
@@ -1112,7 +1140,7 @@ function calcRange(emp,y,m,start,end){
   const uangMakan = cUM*emp.umRate;
   const lemburBiasaRp = jamLB*emp.lemburBiasaRate;
   const lemburMerahRp = jamLM*lemburMerahRate(emp);
-  return {cT,cSH,cA,cSD,cDL,cCT,cUM,jamLB,jamLM,potTidakMasuk,potTerlambat,potSetengahHari,uangMakan,lemburBiasaRp,lemburMerahRp};
+  return {cT,cSH,cA,cSD,cLN,cDL,cCT,cUM,jamLB,jamLM,potTidakMasuk,potTerlambat,potSetengahHari,uangMakan,lemburBiasaRp,lemburMerahRp};
 }
 /* ===========================================================
    INPUT LEMBUR
@@ -1803,11 +1831,11 @@ function slipBulananHTML(emp, c){
           :""
       }
       <div class="slip-line sub">
-        <div class="lbl">Ket. absensi lain</div>
-        <div class="val">
-          SD:${c.cSD} · DL:${c.cDL} · CT:${c.cCT}
-        </div>
-      </div>
+  <div class="lbl">Ket. absensi lain</div>
+  <div class="val">
+    SD:${c.cSD} · LN:${c.cLN} · DL:${c.cDL} · CT:${c.cCT}
+  </div>
+</div>
     </div>
     <div class="slip-total">
       <div class="lbl">Total Diterima</div>
