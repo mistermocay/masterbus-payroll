@@ -502,10 +502,13 @@ backdrop-filter:blur(2px);
         <h2 class="section-title">Absensi <span id="absMonthLabel"></span></h2>
         <p class="section-sub">Klik sel untuk isi kode kehadiran atau jam lembur per hari.</p>
       </div>
-      <div class="segmented" id="segAbsMode">
-        <button data-mode="kehadiran" class="active">Kehadiran</button>
-        <button data-mode="lb">Lembur Biasa</button>
-        <button data-mode="lm">Lembur Tgl Merah</button>
+      <div class="toolbar-actions">
+        <div class="segmented" id="segAbsMode">
+          <button data-mode="kehadiran" class="active">Kehadiran</button>
+          <button data-mode="lb">Lembur Biasa</button>
+          <button data-mode="lm">Lembur Tgl Merah</button>
+        </div>
+        <button class="btn btn-primary" id="btnPrintAbsensi">🖨 Cetak / Simpan PDF</button>
       </div>
     </div>
     <div class="att-wrap"><div id="attGridWrap"></div></div>
@@ -1561,6 +1564,209 @@ document.querySelectorAll('#segAbsMode button').forEach(b=>{
     renderAbsensi();
   });
 });
+
+function printAbsensi(){
+  const source = document.querySelector('#attGridWrap table.att');
+  if(!source){
+    showToast('Tidak ada data absensi untuk dicetak.');
+    return;
+  }
+
+  const modeLabel = {
+    kehadiran: 'KEHADIRAN',
+    lb: 'LEMBUR BIASA',
+    lm: 'LEMBUR TANGGAL MERAH'
+  }[state.absMode] || 'ABSENSI';
+
+  // Clone table so printing never changes the live application.
+  const table = source.cloneNode(true);
+
+  // Convert form controls to plain text for a clean PDF/printout.
+  table.querySelectorAll('select').forEach(el=>{
+    const value = el.options[el.selectedIndex]?.textContent?.trim() || '—';
+    const span = document.createElement('span');
+    span.textContent = value || '—';
+    span.className = 'print-value';
+    el.replaceWith(span);
+  });
+
+  table.querySelectorAll('input').forEach(el=>{
+    const span = document.createElement('span');
+    span.textContent = el.value || '—';
+    span.className = 'print-value';
+    el.replaceWith(span);
+  });
+
+  const periode = `${BULAN_ID[state.month-1]} ${state.year}`;
+  const tanggalCetak = new Date().toLocaleString('id-ID', {
+    dateStyle:'long',
+    timeStyle:'short'
+  });
+
+  const w = window.open('', '_blank');
+  if(!w){
+    alert('Pop-up diblokir browser. Izinkan pop-up untuk mencetak.');
+    return;
+  }
+
+  w.document.write(`<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Absensi ${periode} - ${modeLabel}</title>
+<style>
+  @page{
+    size: A3 landscape;
+    margin: 10mm;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:Arial,Helvetica,sans-serif;
+    color:#111;
+    font-size:9px;
+  }
+  .header{
+    text-align:center;
+    margin-bottom:10px;
+  }
+  .header h1{
+    margin:0;
+    font-size:17px;
+    font-weight:700;
+  }
+  .header h2{
+    margin:4px 0 2px;
+    font-size:13px;
+    font-weight:700;
+  }
+  .header p{
+    margin:2px 0;
+    font-size:9px;
+    color:#444;
+  }
+  .meta{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    border-top:1px solid #222;
+    border-bottom:1px solid #222;
+    padding:5px 0;
+    margin-bottom:8px;
+    font-size:9px;
+  }
+  .meta strong{font-size:10px}
+  table{
+    width:100%;
+    border-collapse:collapse;
+    table-layout:fixed;
+  }
+  th,td{
+    border:1px solid #555;
+    text-align:center;
+    padding:3px 1px;
+    height:22px;
+    vertical-align:middle;
+  }
+  th{
+    background:#e7eefb;
+    font-weight:700;
+  }
+  th.name-col, td.name-col{
+    width:175px;
+    text-align:left;
+    white-space:nowrap;
+    padding-left:5px;
+  }
+  th .dow{
+    display:block;
+    font-size:7px;
+    font-weight:400;
+  }
+  th.sunday, td.sunday{background:#f5dfd9}
+  th.friday{background:#fbe9c9}
+  .print-value{
+    display:inline-block;
+    min-width:18px;
+    font-family:Arial,Helvetica,sans-serif;
+    font-weight:600;
+  }
+  td.code-A .print-value{color:#c0392b;font-weight:700}
+  td.code-T .print-value{color:#c98a00;font-weight:700}
+  td.code-SH .print-value,
+  td.code-SD .print-value,
+  td.code-LN .print-value,
+  td.code-DL .print-value,
+  td.code-CT .print-value{color:#1656b8;font-weight:700}
+  .legend{
+    margin-top:8px;
+    display:flex;
+    gap:14px;
+    flex-wrap:wrap;
+    font-size:8px;
+  }
+  .footer{
+    margin-top:18px;
+    display:flex;
+    justify-content:space-between;
+    font-size:9px;
+  }
+  .sign{
+    width:220px;
+    text-align:center;
+  }
+  .sign-line{
+    margin-top:35px;
+    border-top:1px solid #333;
+    padding-top:4px;
+  }
+  @media print{
+    body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  }
+</style>
+</head>
+<body>
+  <div class="header">
+    <h1>PT MASTER ARTHA KHARISMA</h1>
+    <h2>ABSENSI KARYAWAN — DIVISI BUS</h2>
+    <p>Dokumen backup absensi</p>
+  </div>
+
+  <div class="meta">
+    <div><strong>Periode:</strong> ${periode}</div>
+    <div><strong>Data:</strong> ${modeLabel}</div>
+    <div><strong>Tanggal Cetak:</strong> ${tanggalCetak}</div>
+  </div>
+
+  ${table.outerHTML}
+
+  <div class="legend">
+    <span><strong>T</strong> = Terlambat</span>
+    <span><strong>SH</strong> = Setengah Hari</span>
+    <span><strong>A</strong> = Alpha</span>
+    <span><strong>SD</strong> = Surat Dokter</span>
+    <span><strong>LN</strong> = Libur Nasional</span>
+    <span><strong>DL</strong> = Dinas Luar</span>
+    <span><strong>CT</strong> = Cuti</span>
+    <span><strong>Kolom merah</strong> = Minggu</span>
+    <span><strong>Kolom kuning</strong> = Jumat / closing</span>
+  </div>
+
+  <div class="footer">
+    <div class="sign">Disiapkan Oleh<div class="sign-line">________________________</div></div>
+    <div class="sign">Diperiksa / Disetujui<div class="sign-line">________________________</div></div>
+  </div>
+
+<script>
+window.onload=function(){
+  setTimeout(function(){ window.print(); }, 250);
+};
+<\/script>
+</body>
+</html>`);
+  w.document.close();
+}
+
 function renderAbsensi(){
   document.getElementById('absMonthLabel').textContent = '— '+BULAN_ID[state.month-1]+' '+state.year;
   const dim = daysInMonth(state.year, state.month);
@@ -1994,6 +2200,11 @@ document.getElementById('btnPrintUM').addEventListener('click', ()=>{
   document.getElementById('print-area').innerHTML = wrap.innerHTML;
   window.print();
 });
+
+const btnPrintAbsensi = document.getElementById('btnPrintAbsensi');
+if(btnPrintAbsensi){
+  btnPrintAbsensi.addEventListener('click', printAbsensi);
+}
 
 /* ============================= REKAP TAB ============================= */
 function renderRekap(){
