@@ -229,6 +229,23 @@
   }
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
+  .print-absensi{font-family:Arial,sans-serif;color:#111;background:#fff;}
+  .print-absensi-head{text-align:center;margin-bottom:14px;}
+  .print-absensi-head h1{font-size:16px;margin:0 0 4px;font-weight:700;}
+  .print-absensi-head h2{font-size:14px;margin:0 0 3px;font-weight:700;}
+  .print-absensi-head p{font-size:10px;margin:0;color:#555;}
+  .print-absensi table{width:100%;border-collapse:collapse;table-layout:fixed;}
+  .print-absensi th,.print-absensi td{border:1px solid #777;padding:4px 3px;font-size:8px;text-align:center;vertical-align:middle;}
+  .print-absensi th{font-weight:700;background:#eee;}
+  .print-absensi td.name-col,.print-absensi th.name-col{text-align:left;width:150px;}
+  .print-absensi .dow{display:block;font-size:7px;font-weight:400;}
+  .print-absensi .sunday{background:#f7f7f7;}
+  .print-absensi .friday{background:#fff8d8;}
+  .print-absensi .code-T{background:#fff8e5;}
+  .print-absensi .code-A{background:#fff0f0;}
+  .print-absensi .code-CT,.print-absensi .code-SD,.print-absensi .code-DL,.print-absensi .code-LN{background:#eef6ff;}
+  .print-absensi .code-SH{background:#f1efff;}
+
   @media print{
     body *{visibility:hidden;}
     #print-area, #print-area *{visibility:visible;}
@@ -1827,7 +1844,51 @@ document.getElementById('absMarkAllPresent')?.addEventListener('click', async ()
 document.getElementById('absMarkWeekOff')?.addEventListener('click', ()=>showToast('Minggu sudah otomatis dianggap hari libur.'));
 document.getElementById('absApplyLeave')?.addEventListener('click', ()=>showToast('Untuk CT, klik tanggal pada kalender lalu pilih Cuti.'));
 document.getElementById('absApplyDL')?.addEventListener('click', ()=>showToast('Untuk DL, klik tanggal pada kalender lalu pilih Dinas Luar.'));
-document.getElementById('btnPrintAbsensi')?.addEventListener('click', ()=>window.print());
+function printAbsensiRekap(){
+  const src = document.getElementById('attGridWrap');
+  const printArea = document.getElementById('print-area');
+  if(!src || !src.innerHTML.trim()){
+    showToast('Rekap absensi belum tersedia.');
+    return;
+  }
+
+  // Clone tabel rekap agar tampilan layar tidak ikut berubah.
+  const clone = src.cloneNode(true);
+
+  // Ubah SELECT menjadi teks kode yang siap dicetak.
+  clone.querySelectorAll('select').forEach(sel=>{
+    const opt = sel.options[sel.selectedIndex];
+    const span = document.createElement('span');
+    span.textContent = opt ? opt.textContent.trim() : '—';
+    sel.replaceWith(span);
+  });
+
+  // Ubah INPUT lembur menjadi angka yang siap dicetak.
+  clone.querySelectorAll('input').forEach(inp=>{
+    const span = document.createElement('span');
+    span.textContent = inp.value || '—';
+    inp.replaceWith(span);
+  });
+
+  const title = `Rekap Absensi — ${BULAN_ID[state.month-1]} ${state.year}`;
+  const subtitle = 'PT MASTER ARTHA KHARISMA (DIVISI BUS)';
+
+  printArea.innerHTML = `
+    <div class="print-absensi">
+      <div class="print-absensi-head">
+        <h1>${esc(subtitle)}</h1>
+        <h2>${esc(title)}</h2>
+        <p>Rekap seluruh karyawan</p>
+      </div>
+      ${clone.outerHTML}
+    </div>
+  `;
+
+  // Beri browser sedikit waktu untuk menerapkan layout sebelum dialog print.
+  requestAnimationFrame(()=>window.print());
+}
+
+document.getElementById('btnPrintAbsensi')?.addEventListener('click', printAbsensiRekap);
 
 /* ============================= SLIP BULANAN TAB ============================= */
 function populateEmpSelects(){
