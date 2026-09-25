@@ -399,6 +399,23 @@ backdrop-filter:blur(2px);
     filter:drop-shadow(0 8px 18px rgba(37,99,235,.25));
 
 }
+
+/* ===== ABSENSI CALENDAR REDESIGN ===== */
+.abs-redesign{display:grid;grid-template-columns:280px minmax(0,1fr);gap:14px;}
+.abs-side,.abs-main,.abs-rekap{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);}
+.abs-side{padding:12px;}
+.abs-search{position:relative;margin-bottom:8px}.abs-search input{width:100%;padding:10px 12px 10px 34px;border:1px solid var(--line);border-radius:9px;font:inherit;font-size:12.5px}.abs-search:before{content:'⌕';position:absolute;left:12px;top:7px;color:var(--ink-soft);font-size:18px;z-index:1}
+.abs-employee-list{max-height:455px;overflow:auto}.abs-employee{display:flex;align-items:center;gap:10px;padding:9px 8px;border-radius:9px;cursor:pointer}.abs-employee:hover{background:var(--line-soft)}.abs-employee.active{background:#dceafe;box-shadow:inset 3px 0 0 var(--teal)}
+.abs-avatar{width:34px;height:34px;border-radius:50%;background:#dbeafe;color:var(--teal);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;flex:0 0 34px}.abs-employee.active .abs-avatar{background:var(--teal);color:#fff}.abs-employee-name{font-size:12.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.abs-employee-dept{font-size:10.5px;color:var(--ink-soft);margin-top:1px}
+.abs-main{padding:16px;min-width:0}.abs-main-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.abs-profile{display:flex;align-items:center;gap:11px}.abs-profile .abs-avatar{width:44px;height:44px;flex-basis:44px;font-size:14px}.abs-profile-name{font-size:16px;font-weight:800}.abs-profile-dept{font-size:11px;color:var(--ink-soft);margin-top:1px}
+.abs-stats{display:flex;gap:7px;flex-wrap:wrap}.abs-stat{min-width:78px;padding:7px 9px;border-radius:8px;text-align:center;background:#f8fafc;border:1px solid var(--line-soft)}.abs-stat b{display:block;font-family:'IBM Plex Mono',monospace;font-size:15px}.abs-stat span{font-size:9.5px;color:var(--ink-soft)}.abs-stat.hadir{background:#eaf9f0;color:#167344}.abs-stat.terlambat{background:#fff6dd;color:#a26b00}.abs-stat.alpha{background:#fff0f0;color:#b42318}.abs-stat.cuti{background:#edf6ff;color:#175ea8}
+.abs-calendar-bar{display:flex;align-items:center;justify-content:center;gap:8px;margin:12px 0 8px}.abs-month-title{min-width:220px;text-align:center;font-weight:800;font-size:13px}.abs-nav-btn{width:34px;height:32px;border:1px solid var(--line);background:#fff;border-radius:8px;color:var(--teal);font-weight:800;cursor:pointer}.abs-nav-btn:hover{background:var(--line-soft)}
+.abs-calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border:1px solid var(--line);border-radius:9px;overflow:hidden}.abs-cal-head{background:var(--teal-dim);padding:7px 4px;text-align:center;font-size:10px;font-weight:800;color:var(--ink-soft);border-right:1px solid var(--line)}.abs-cal-head:last-child{border-right:0}.abs-cal-head.sun,.abs-cal-day.sun{background:#fff0f0}.abs-cal-head.sat,.abs-cal-day.sat{background:#fff8f8}.abs-cal-day{min-height:62px;padding:6px;border-right:1px solid var(--line-soft);border-top:1px solid var(--line-soft);cursor:pointer;position:relative;background:#fff}.abs-cal-day:hover{background:#f4f8ff}.abs-cal-day.muted{background:#f8fafc;color:#c4cbd4;cursor:default}.abs-cal-day:nth-child(7n){border-right:0}.abs-day-num{font-size:10px;font-weight:700}.abs-day-status{display:flex;justify-content:center;align-items:center;margin-top:8px}.abs-status-icon{width:20px;height:20px;border-radius:5px;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:900}.abs-status-icon.hadir{background:#16a05a}.abs-status-icon.t{background:#e6a81c}.abs-status-icon.a{background:#d92d20}.abs-status-icon.sh{background:#5b4bdb}.abs-status-icon.sd,.abs-status-icon.ln,.abs-status-icon.dl,.abs-status-icon.ct{background:#1769e0}.abs-status-dash{width:20px;height:20px;border-radius:5px;background:#e5e7eb;color:#8b95a1;display:inline-flex;align-items:center;justify-content:center;font-weight:800}.abs-legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:9px;font-size:10px;color:var(--ink-soft)}.abs-legend span{display:inline-flex;align-items:center;gap:4px}.abs-legend .abs-status-icon{width:17px;height:17px;font-size:9px}
+.abs-quick{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.abs-quick button{border:0;border-radius:7px;padding:7px 9px;background:#edf5ff;color:#185abc;font-size:10.5px;font-weight:700;cursor:pointer}.abs-quick button:hover{background:#dbeafe}.abs-quick .green{background:#eaf9f0;color:#167344}
+.abs-rekap{margin-top:14px;padding:14px}.abs-rekap-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.abs-rekap-table{overflow:auto;border:1px solid var(--line);border-radius:9px;margin-top:10px}.abs-rekap-table table{min-width:900px}.abs-rekap-table th{position:sticky;top:0;z-index:2}.abs-rekap-table td,.abs-rekap-table th{font-size:10.5px}.abs-rekap-table .att-cell{font-family:'IBM Plex Mono',monospace;font-weight:700;text-align:center;min-width:36px}.abs-rekap-table .att-cell.t{color:#b77900;background:#fff8e5}.abs-rekap-table .att-cell.a{color:#b42318;background:#fff0f0}.abs-rekap-table .att-cell.ct,.abs-rekap-table .att-cell.sd,.abs-rekap-table .att-cell.dl,.abs-rekap-table .att-cell.ln{color:#175ea8;background:#eef6ff}.abs-rekap-table .att-cell.sh{color:#5145cd;background:#f1efff}
+.abs-popup-backdrop{position:fixed;inset:0;background:rgba(20,30,45,.5);display:none;align-items:center;justify-content:center;padding:18px;z-index:100000}.abs-popup-backdrop.open{display:flex}.abs-popup{width:100%;max-width:420px;background:#fff;border-radius:14px;box-shadow:0 24px 70px rgba(0,0,0,.3);overflow:hidden}.abs-popup-head{display:flex;justify-content:space-between;align-items:flex-start;padding:18px 18px 12px}.abs-popup-date{font-size:17px;font-weight:800}.abs-popup-meta{font-size:11px;color:var(--ink-soft);margin-top:3px}.abs-popup-close{border:0;background:transparent;font-size:22px;color:var(--ink-soft);cursor:pointer}.abs-options{padding:4px 18px 14px}.abs-option{display:flex;align-items:center;gap:10px;width:100%;padding:10px;border:1px solid var(--line-soft);border-radius:8px;background:#fff;margin:5px 0;text-align:left;cursor:pointer}.abs-option:hover{background:#f7faff}.abs-option.selected{background:#edf5ff;border-color:#9fc3ff}.abs-option .abs-status-icon{width:22px;height:22px}.abs-option-text b{display:block;font-size:12px}.abs-option-text span{font-size:10px;color:var(--ink-soft)}.abs-popup-foot{display:flex;justify-content:space-between;gap:8px;padding:12px 18px 16px;border-top:1px solid var(--line-soft)}.abs-popup-foot .btn{min-width:100px;justify-content:center}.abs-popup-foot .btn-danger{border-color:#f3a6a0}.abs-popup-foot .btn-danger:hover{background:#fff0f0}
+@media(max-width:900px){.abs-redesign{grid-template-columns:1fr}.abs-employee-list{max-height:210px}.abs-cal-day{min-height:54px}}
+
 </style>
 </head>
 <body>
@@ -500,20 +517,63 @@ backdrop-filter:blur(2px);
     <div class="row-between" style="margin-bottom:14px;">
       <div>
         <h2 class="section-title">Absensi <span id="absMonthLabel"></span></h2>
-        <p class="section-sub">Klik sel untuk isi kode kehadiran atau jam lembur per hari.</p>
-      </div>
-      <div class="toolbar-actions">
-        <div class="segmented" id="segAbsMode">
-          <button data-mode="kehadiran" class="active">Kehadiran</button>
-          <button data-mode="lb">Lembur Biasa</button>
-          <button data-mode="lm">Lembur Tgl Merah</button>
-        </div>
-        <button class="btn btn-primary" id="btnPrintAbsensi">🖨 Cetak / Simpan PDF</button>
+        <p class="section-sub">Pilih karyawan lalu klik tanggal untuk mengisi kode absensi.</p>
       </div>
     </div>
-    <div class="att-wrap"><div id="attGridWrap"></div></div>
-    <div class="legend" id="attLegend"></div>
+
+    <div class="abs-redesign">
+      <aside class="abs-side">
+        <div class="abs-search"><input id="absEmployeeSearch" placeholder="Cari nama atau bagian..."></div>
+        <div id="absEmployeeList" class="abs-employee-list"></div>
+      </aside>
+
+      <div class="abs-main">
+        <div class="abs-main-head">
+          <div class="abs-profile">
+            <div id="absSelectedAvatar" class="abs-avatar">--</div>
+            <div><div id="absSelectedName" class="abs-profile-name">Pilih Karyawan</div><div id="absSelectedDept" class="abs-profile-dept">-</div></div>
+          </div>
+          <div class="abs-stats" id="absStats"></div>
+        </div>
+        <div class="abs-calendar-bar">
+          <button class="abs-nav-btn" id="absPrevMonth">‹</button>
+          <div id="absCalendarTitle" class="abs-month-title">-</div>
+          <button class="abs-nav-btn" id="absNextMonth">›</button>
+        </div>
+        <div id="absCalendarWrap"></div>
+        <div id="absLegend" class="abs-legend"></div>
+        <div class="abs-quick">
+          <button class="green" id="absMarkAllPresent">✓ Tandai Semua Hadir</button>
+          <button id="absMarkWeekOff">◉ Tandai Minggu sebagai Libur</button>
+          <button id="absApplyLeave">CT Terapkan Cuti ke Tanggal Terpilih</button>
+          <button id="absApplyDL">DL Terapkan Dinas Luar ke Tanggal Terpilih</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="abs-rekap">
+      <div class="abs-rekap-head">
+        <div><h2 class="section-title">Rekap Absensi — <span id="absRekapMonth"></span></h2><p class="section-sub" style="margin-bottom:0">Klik tanggal di kalender untuk mengubah kode. Rekap ini menampilkan seluruh karyawan sekaligus.</p></div>
+        <button class="btn btn-primary" id="btnPrintAbsensi">🖨 Cetak / Simpan PDF</button>
+      </div>
+      <div class="abs-rekap-table"><div id="attGridWrap"></div></div>
+    </div>
+    <div class="legend" id="attLegend" style="display:none"></div>
   </section>
+
+  <div id="absPopupBackdrop" class="abs-popup-backdrop">
+    <div class="abs-popup">
+      <div class="abs-popup-head">
+        <div><div id="absPopupDate" class="abs-popup-date">-</div><div id="absPopupMeta" class="abs-popup-meta">-</div></div>
+        <button class="abs-popup-close" id="absPopupClose">×</button>
+      </div>
+      <div id="absPopupOptions" class="abs-options"></div>
+      <div class="abs-popup-foot">
+        <button class="btn btn-danger" id="absPopupDelete">🗑 Hapus</button>
+        <button class="btn btn-primary" id="absPopupSave">💾 Simpan</button>
+      </div>
+    </div>
+  </div>
 
   <!-- PANEL LEMBUR -->
   <section class="panel" id="panel-lembur">
@@ -919,6 +979,10 @@ let state = {
     year:NOW.getFullYear(),
 
     absMode:'kehadiran',
+
+    absEmpId:null,
+
+    absPopup:null,
 
     editingEmpId:null,
 
@@ -1564,210 +1628,100 @@ document.querySelectorAll('#segAbsMode button').forEach(b=>{
     renderAbsensi();
   });
 });
-
-function printAbsensi(){
-  const source = document.querySelector('#attGridWrap table.att');
-  if(!source){
-    showToast('Tidak ada data absensi untuk dicetak.');
-    return;
-  }
-
-  const modeLabel = {
-    kehadiran: 'KEHADIRAN',
-    lb: 'LEMBUR BIASA',
-    lm: 'LEMBUR TANGGAL MERAH'
-  }[state.absMode] || 'ABSENSI';
-
-  // Clone table so printing never changes the live application.
-  const table = source.cloneNode(true);
-
-  // Convert form controls to plain text for a clean PDF/printout.
-  table.querySelectorAll('select').forEach(el=>{
-    const value = el.options[el.selectedIndex]?.textContent?.trim() || '—';
-    const span = document.createElement('span');
-    span.textContent = value || '—';
-    span.className = 'print-value';
-    el.replaceWith(span);
-  });
-
-  table.querySelectorAll('input').forEach(el=>{
-    const span = document.createElement('span');
-    span.textContent = el.value || '—';
-    span.className = 'print-value';
-    el.replaceWith(span);
-  });
-
-  const periode = `${BULAN_ID[state.month-1]} ${state.year}`;
-  const tanggalCetak = new Date().toLocaleString('id-ID', {
-    dateStyle:'long',
-    timeStyle:'short'
-  });
-
-  const w = window.open('', '_blank');
-  if(!w){
-    alert('Pop-up diblokir browser. Izinkan pop-up untuk mencetak.');
-    return;
-  }
-
-  w.document.write(`<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8">
-<title>Absensi ${periode} - ${modeLabel}</title>
-<style>
-  @page{
-    size: A3 landscape;
-    margin: 10mm;
-  }
-  *{box-sizing:border-box}
-  body{
-    margin:0;
-    font-family:Arial,Helvetica,sans-serif;
-    color:#111;
-    font-size:9px;
-  }
-  .header{
-    text-align:center;
-    margin-bottom:10px;
-  }
-  .header h1{
-    margin:0;
-    font-size:17px;
-    font-weight:700;
-  }
-  .header h2{
-    margin:4px 0 2px;
-    font-size:13px;
-    font-weight:700;
-  }
-  .header p{
-    margin:2px 0;
-    font-size:9px;
-    color:#444;
-  }
-  .meta{
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-end;
-    border-top:1px solid #222;
-    border-bottom:1px solid #222;
-    padding:5px 0;
-    margin-bottom:8px;
-    font-size:9px;
-  }
-  .meta strong{font-size:10px}
-  table{
-    width:100%;
-    border-collapse:collapse;
-    table-layout:fixed;
-  }
-  th,td{
-    border:1px solid #555;
-    text-align:center;
-    padding:3px 1px;
-    height:22px;
-    vertical-align:middle;
-  }
-  th{
-    background:#e7eefb;
-    font-weight:700;
-  }
-  th.name-col, td.name-col{
-    width:175px;
-    text-align:left;
-    white-space:nowrap;
-    padding-left:5px;
-  }
-  th .dow{
-    display:block;
-    font-size:7px;
-    font-weight:400;
-  }
-  th.sunday, td.sunday{background:#f5dfd9}
-  th.friday{background:#fbe9c9}
-  .print-value{
-    display:inline-block;
-    min-width:18px;
-    font-family:Arial,Helvetica,sans-serif;
-    font-weight:600;
-  }
-  td.code-A .print-value{color:#c0392b;font-weight:700}
-  td.code-T .print-value{color:#c98a00;font-weight:700}
-  td.code-SH .print-value,
-  td.code-SD .print-value,
-  td.code-LN .print-value,
-  td.code-DL .print-value,
-  td.code-CT .print-value{color:#1656b8;font-weight:700}
-  .legend{
-    margin-top:8px;
-    display:flex;
-    gap:14px;
-    flex-wrap:wrap;
-    font-size:8px;
-  }
-  .footer{
-    margin-top:18px;
-    display:flex;
-    justify-content:space-between;
-    font-size:9px;
-  }
-  .sign{
-    width:220px;
-    text-align:center;
-  }
-  .sign-line{
-    margin-top:35px;
-    border-top:1px solid #333;
-    padding-top:4px;
-  }
-  @media print{
-    body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  }
-</style>
-</head>
-<body>
-  <div class="header">
-    <h1>PT MASTER ARTHA KHARISMA</h1>
-    <h2>ABSENSI KARYAWAN — DIVISI BUS</h2>
-    <p>Dokumen backup absensi</p>
-  </div>
-
-  <div class="meta">
-    <div><strong>Periode:</strong> ${periode}</div>
-    <div><strong>Data:</strong> ${modeLabel}</div>
-    <div><strong>Tanggal Cetak:</strong> ${tanggalCetak}</div>
-  </div>
-
-  ${table.outerHTML}
-
-  <div class="legend">
-    <span><strong>T</strong> = Terlambat</span>
-    <span><strong>SH</strong> = Setengah Hari</span>
-    <span><strong>A</strong> = Alpha</span>
-    <span><strong>SD</strong> = Surat Dokter</span>
-    <span><strong>LN</strong> = Libur Nasional</span>
-    <span><strong>DL</strong> = Dinas Luar</span>
-    <span><strong>CT</strong> = Cuti</span>
-    <span><strong>Kolom merah</strong> = Minggu</span>
-    <span><strong>Kolom kuning</strong> = Jumat / closing</span>
-  </div>
-
-  <div class="footer">
-    <div class="sign">Disiapkan Oleh<div class="sign-line">________________________</div></div>
-    <div class="sign">Diperiksa / Disetujui<div class="sign-line">________________________</div></div>
-  </div>
-
-<script>
-window.onload=function(){
-  setTimeout(function(){ window.print(); }, 250);
-};
-<\/script>
-</body>
-</html>`);
-  w.document.close();
+function renderAbsensi(){
+  renderAbsensiCalendar();
+  renderAbsensiTable();
 }
 
-function renderAbsensi(){
+function absInitials(name){
+  return String(name||'').trim().split(/\s+/).slice(0,2).map(x=>x[0]||'').join('').toUpperCase() || '--';
+}
+function absStatusMeta(code){
+  const map={
+    '':{cls:'hadir',icon:'✓',label:'Hadir',sub:'(kosong)'},
+    T:{cls:'t',icon:'T',label:'Terlambat',sub:'Potongan sesuai aturan'},
+    SH:{cls:'sh',icon:'SH',label:'Setengah Hari',sub:'Potongan 1/2 hari'},
+    A:{cls:'a',icon:'A',label:'Alpha',sub:'Potongan 1 hari'},
+    SD:{cls:'sd',icon:'SD',label:'Surat Dokter',sub:'Tidak mendapat UM'},
+    LN:{cls:'ln',icon:'LN',label:'Libur Nasional',sub:'Hari libur'},
+    DL:{cls:'dl',icon:'DL',label:'Dinas Luar',sub:'Tidak mendapat UM'},
+    CT:{cls:'ct',icon:'CT',label:'Cuti',sub:'Tidak mendapat UM'}
+  };
+  return map[code]||map[''];
+}
+function absSetPeriodFromCalendar(y,m){
+  state.year=y; state.month=m;
+  const sm=document.getElementById('selMonth'), sy=document.getElementById('selYear');
+  if(sm) sm.value=m; if(sy) sy.value=y;
+}
+function absChangeMonth(delta){
+  let y=state.year, m=state.month+delta;
+  if(m<1){m=12;y--;} if(m>12){m=1;y++;}
+  absSetPeriodFromCalendar(y,m);
+  loadAttendance(y,m).then(()=>renderActiveTab());
+}
+function renderAbsEmployeeList(){
+  const q=(document.getElementById('absEmployeeSearch')?.value||'').toLowerCase().trim();
+  const wrap=document.getElementById('absEmployeeList'); if(!wrap) return;
+  const list=employees.filter(e=>!q || String(e.name).toLowerCase().includes(q) || String(e.bagian||'').toLowerCase().includes(q));
+  if(!state.absEmpId || !employees.some(e=>e.id===state.absEmpId)) state.absEmpId=employees[0]?.id||null;
+  wrap.innerHTML=list.map(e=>`<div class="abs-employee ${e.id===state.absEmpId?'active':''}" data-abs-emp="${e.id}"><div class="abs-avatar">${absInitials(e.name)}</div><div style="min-width:0"><div class="abs-employee-name">${esc(e.name)}</div><div class="abs-employee-dept">${esc(e.bagian||'-')}</div></div></div>`).join('') || '<div class="empty-state" style="padding:30px 8px">Karyawan tidak ditemukan.</div>';
+  wrap.querySelectorAll('[data-abs-emp]').forEach(el=>el.onclick=()=>{state.absEmpId=el.dataset.absEmp;renderAbsensiCalendar();renderAbsEmployeeList();});
+}
+function renderAbsensiCalendar(){
+  const monthLabel=BULAN_ID[state.month-1]+' '+state.year;
+  const monthEl=document.getElementById('absMonthLabel'); if(monthEl) monthEl.textContent='— '+monthLabel;
+  const title=document.getElementById('absCalendarTitle'); if(title) title.textContent=monthLabel;
+  const rekapMonth=document.getElementById('absRekapMonth'); if(rekapMonth) rekapMonth.textContent=monthLabel;
+  renderAbsEmployeeList();
+  const emp=employees.find(e=>e.id===state.absEmpId);
+  if(!emp){document.getElementById('absCalendarWrap').innerHTML='<div class="empty-state">Tambahkan karyawan terlebih dahulu.</div>';return;}
+  document.getElementById('absSelectedAvatar').textContent=absInitials(emp.name);
+  document.getElementById('absSelectedName').textContent=emp.name;
+  document.getElementById('absSelectedDept').textContent=emp.bagian||'-';
+  const dim=daysInMonth(state.year,state.month);
+  let first=new Date(state.year,state.month-1,1).getDay();
+  const cells=[];
+  for(let i=0;i<first;i++) cells.push('<div class="abs-cal-day muted"></div>');
+  const counts={hadir:0,t:0,a:0,ct:0};
+  for(let d=1;d<=dim;d++){
+    const dt=new Date(state.year,state.month-1,d), dow=dt.getDay(), rec=getAttRec(state.year,state.month,emp.id,d), meta=absStatusMeta(rec.kode);
+    if(dow!==0){if(!rec.kode)counts.hadir++;else if(rec.kode==='T')counts.t++;else if(rec.kode==='A')counts.a++;else if(rec.kode==='CT')counts.ct++;}
+    const icon=dow===0?'<span class="abs-status-dash">–</span>':`<span class="abs-status-icon ${meta.cls}">${meta.icon}</span>`;
+    cells.push(`<div class="abs-cal-day ${dow===0?'sun':''} ${dow===6?'sat':''}" data-abs-day="${d}"><div class="abs-day-num">${d}</div><div class="abs-day-status">${icon}</div></div>`);
+  }
+  while(cells.length%7) cells.push('<div class="abs-cal-day muted"></div>');
+  const heads=['Sen','Sel','Rab','Kam','Jum','Sab','Min'];
+  // Shift Sunday-first JS grid into Monday-first visual.
+  const mondayCells=[];
+  const raw=[];
+  for(let d=1;d<=dim;d++){raw.push(d);}
+  const startMon=(new Date(state.year,state.month-1,1).getDay()+6)%7;
+  let grid=[]; for(let i=0;i<startMon;i++)grid.push('<div class="abs-cal-day muted"></div>');
+  for(let d=1;d<=dim;d++){const dow=new Date(state.year,state.month-1,d).getDay();const rec=getAttRec(state.year,state.month,emp.id,d);const meta=absStatusMeta(rec.kode);const icon=dow===0?'<span class="abs-status-dash">–</span>':`<span class="abs-status-icon ${meta.cls}">${meta.icon}</span>`;grid.push(`<div class="abs-cal-day ${dow===0?'sun':''} ${dow===6?'sat':''}" data-abs-day="${d}"><div class="abs-day-num">${d}</div><div class="abs-day-status">${icon}</div></div>`);}
+  while(grid.length%7)grid.push('<div class="abs-cal-day muted"></div>');
+  document.getElementById('absCalendarWrap').innerHTML='<div class="abs-calendar">'+heads.map((h,i)=>`<div class="abs-cal-head ${i===6?'sun':''} ${i===5?'sat':''}">${h}</div>`).join('')+grid.join('')+'</div>';
+  document.getElementById('absStats').innerHTML=`<div class="abs-stat hadir"><b>${counts.hadir}</b><span>Hadir</span></div><div class="abs-stat terlambat"><b>${counts.t}</b><span>Terlambat</span></div><div class="abs-stat alpha"><b>${counts.a}</b><span>Alpha</span></div><div class="abs-stat cuti"><b>${counts.ct}</b><span>Cuti</span></div>`;
+  document.getElementById('absLegend').innerHTML=KODE_LIST.map(k=>{const m=absStatusMeta(k.v);return `<span><span class="abs-status-icon ${m.cls}">${m.icon}</span>${m.label}</span>`}).join('');
+  document.querySelectorAll('#absCalendarWrap [data-abs-day]').forEach(el=>el.onclick=()=>openAbsPopup(+el.dataset.absDay));
+}
+function openAbsPopup(day){
+  const emp=employees.find(e=>e.id===state.absEmpId); if(!emp)return;
+  const dt=new Date(state.year,state.month-1,day), rec=getAttRec(state.year,state.month,emp.id,day);
+  state.absPopup={day,code:rec.kode||''};
+  document.getElementById('absPopupDate').textContent=`${day} ${BULAN_ID[state.month-1]} ${state.year}`;
+  document.getElementById('absPopupMeta').textContent=`${emp.name} • ${emp.bagian||'-'}`;
+  document.getElementById('absPopupOptions').innerHTML=KODE_LIST.map(k=>{const m=absStatusMeta(k.v);return `<button class="abs-option ${state.absPopup.code===k.v?'selected':''}" data-code="${k.v}"><span class="abs-status-icon ${m.cls}">${m.icon}</span><span class="abs-option-text"><b>${m.label}</b><span>${m.sub}</span></span></button>`}).join('');
+  document.querySelectorAll('#absPopupOptions [data-code]').forEach(b=>b.onclick=()=>{state.absPopup.code=b.dataset.code;document.querySelectorAll('#absPopupOptions .abs-option').forEach(x=>x.classList.toggle('selected',x===b));});
+  document.getElementById('absPopupBackdrop').classList.add('open');
+}
+function closeAbsPopup(){document.getElementById('absPopupBackdrop').classList.remove('open');}
+async function saveAbsPopup(){
+  if(!state.absPopup)return; const rec=getAttRec(state.year,state.month,state.absEmpId,state.absPopup.day); rec.kode=state.absPopup.code; isDirty=true; saveAttendance(state.year,state.month); closeAbsPopup(); renderAbsensiCalendar(); renderAbsensiTable(); showToast('Absensi berhasil diperbarui.');
+}
+function deleteAbsPopup(){if(!state.absPopup)return;const rec=getAttRec(state.year,state.month,state.absEmpId,state.absPopup.day);rec.kode='';rec.lb=0;rec.lm=0;isDirty=true;saveAttendance(state.year,state.month);closeAbsPopup();renderAbsensiCalendar();renderAbsensiTable();showToast('Kode absensi dihapus.');}
+
+function renderAbsensiTable(){
   document.getElementById('absMonthLabel').textContent = '— '+BULAN_ID[state.month-1]+' '+state.year;
   const dim = daysInMonth(state.year, state.month);
   const days = Array.from({length:dim}, (_,i)=>i+1);
@@ -1858,6 +1812,22 @@ function onAttChange(e){
     }
 
 }
+
+/* ============================= ABSENSI CALENDAR EVENTS ============================= */
+document.getElementById('absEmployeeSearch')?.addEventListener('input', renderAbsEmployeeList);
+document.getElementById('absPrevMonth')?.addEventListener('click', ()=>absChangeMonth(-1));
+document.getElementById('absNextMonth')?.addEventListener('click', ()=>absChangeMonth(1));
+document.getElementById('absPopupClose')?.addEventListener('click', closeAbsPopup);
+document.getElementById('absPopupSave')?.addEventListener('click', saveAbsPopup);
+document.getElementById('absPopupDelete')?.addEventListener('click', deleteAbsPopup);
+document.getElementById('absPopupBackdrop')?.addEventListener('click', e=>{if(e.target.id==='absPopupBackdrop')closeAbsPopup();});
+document.getElementById('absMarkAllPresent')?.addEventListener('click', async ()=>{
+  if(!state.absEmpId)return; const dim=daysInMonth(state.year,state.month); for(let d=1;d<=dim;d++){if(new Date(state.year,state.month-1,d).getDay()!==0)getAttRec(state.year,state.month,state.absEmpId,d).kode='';} isDirty=true; await saveAttendanceData(monthKey(state.year,state.month),attendance[monthKey(state.year,state.month)]||{}); renderAbsensiCalendar();renderAbsensiTable();showToast('Semua hari kerja ditandai hadir.');
+});
+document.getElementById('absMarkWeekOff')?.addEventListener('click', ()=>showToast('Minggu sudah otomatis dianggap hari libur.'));
+document.getElementById('absApplyLeave')?.addEventListener('click', ()=>showToast('Untuk CT, klik tanggal pada kalender lalu pilih Cuti.'));
+document.getElementById('absApplyDL')?.addEventListener('click', ()=>showToast('Untuk DL, klik tanggal pada kalender lalu pilih Dinas Luar.'));
+document.getElementById('btnPrintAbsensi')?.addEventListener('click', ()=>window.print());
 
 /* ============================= SLIP BULANAN TAB ============================= */
 function populateEmpSelects(){
@@ -2200,11 +2170,6 @@ document.getElementById('btnPrintUM').addEventListener('click', ()=>{
   document.getElementById('print-area').innerHTML = wrap.innerHTML;
   window.print();
 });
-
-const btnPrintAbsensi = document.getElementById('btnPrintAbsensi');
-if(btnPrintAbsensi){
-  btnPrintAbsensi.addEventListener('click', printAbsensi);
-}
 
 /* ============================= REKAP TAB ============================= */
 function renderRekap(){
