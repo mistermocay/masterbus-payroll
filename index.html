@@ -1072,10 +1072,21 @@ let saveAttTimer = null;
 let saveTimer = null;
 
 function saveAttendance(y,m){
-
+    // Simpan otomatis ke Firebase setelah input berhenti berubah selama 400 ms.
     clearTimeout(saveAttTimer);
-
     clearTimeout(saveTimer);
+
+    saveAttTimer = setTimeout(async ()=>{
+        const key = monthKey(y,m);
+        try{
+            await saveAttendanceData(key, attendance[key] || {});
+            isDirty = false;
+        }catch(err){
+            console.error('Gagal menyimpan absensi otomatis:', err);
+            isDirty = true;
+            showToast('Gagal menyimpan absensi. Klik tombol SIMPAN untuk mencoba lagi.');
+        }
+    }, 400);
 }
 
 /* SHOW LOADING */ 
@@ -1734,9 +1745,64 @@ function openAbsPopup(day){
 }
 function closeAbsPopup(){document.getElementById('absPopupBackdrop').classList.remove('open');}
 async function saveAbsPopup(){
-  if(!state.absPopup)return; const rec=getAttRec(state.year,state.month,state.absEmpId,state.absPopup.day); rec.kode=state.absPopup.code; isDirty=true; saveAttendance(state.year,state.month); closeAbsPopup(); renderAbsensiCalendar(); renderAbsensiTable(); showToast('Absensi berhasil diperbarui.');
+  if(!state.absPopup) return;
+
+  const year = state.year;
+  const month = state.month;
+  const key = monthKey(year, month);
+  const rec = getAttRec(year, month, state.absEmpId, state.absPopup.day);
+  rec.kode = state.absPopup.code;
+  isDirty = true;
+
+  // Batalkan timer autosave agar tidak ada dua proses simpan yang bertabrakan.
+  clearTimeout(saveAttTimer);
+  clearTimeout(saveTimer);
+
+  const btn = document.getElementById('absPopupSave');
+  if(btn){ btn.disabled = true; btn.textContent = 'Menyimpan...'; }
+
+  try{
+    await saveAttendanceData(key, attendance[key] || {});
+    isDirty = false;
+    closeAbsPopup();
+    renderAbsensiCalendar();
+    renderAbsensiTable();
+    showToast('Absensi berhasil disimpan ke sistem.');
+  }catch(err){
+    console.error('Gagal menyimpan absensi:', err);
+    showToast('Gagal menyimpan absensi. Periksa koneksi lalu coba SIMPAN lagi.');
+  }finally{
+    if(btn){ btn.disabled = false; btn.textContent = '💾 Simpan'; }
+  }
 }
-function deleteAbsPopup(){if(!state.absPopup)return;const rec=getAttRec(state.year,state.month,state.absEmpId,state.absPopup.day);rec.kode='';rec.lb=0;rec.lm=0;isDirty=true;saveAttendance(state.year,state.month);closeAbsPopup();renderAbsensiCalendar();renderAbsensiTable();showToast('Kode absensi dihapus.');}
+
+async function deleteAbsPopup(){
+  if(!state.absPopup) return;
+
+  const year = state.year;
+  const month = state.month;
+  const key = monthKey(year, month);
+  const rec = getAttRec(year, month, state.absEmpId, state.absPopup.day);
+  rec.kode = '';
+  rec.lb = 0;
+  rec.lm = 0;
+  isDirty = true;
+
+  clearTimeout(saveAttTimer);
+  clearTimeout(saveTimer);
+
+  try{
+    await saveAttendanceData(key, attendance[key] || {});
+    isDirty = false;
+    closeAbsPopup();
+    renderAbsensiCalendar();
+    renderAbsensiTable();
+    showToast('Kode absensi berhasil dihapus dan disimpan.');
+  }catch(err){
+    console.error('Gagal menghapus kode absensi:', err);
+    showToast('Gagal menyimpan perubahan. Periksa koneksi lalu coba lagi.');
+  }
+}
 
 function renderAbsensiTable(){
   document.getElementById('absMonthLabel').textContent = '— '+BULAN_ID[state.month-1]+' '+state.year;
