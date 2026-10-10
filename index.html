@@ -433,6 +433,26 @@ backdrop-filter:blur(2px);
 .abs-popup-backdrop{position:fixed;inset:0;background:rgba(20,30,45,.5);display:none;align-items:center;justify-content:center;padding:18px;z-index:100000}.abs-popup-backdrop.open{display:flex}.abs-popup{width:100%;max-width:420px;background:#fff;border-radius:14px;box-shadow:0 24px 70px rgba(0,0,0,.3);overflow:hidden}.abs-popup-head{display:flex;justify-content:space-between;align-items:flex-start;padding:18px 18px 12px}.abs-popup-date{font-size:17px;font-weight:800}.abs-popup-meta{font-size:11px;color:var(--ink-soft);margin-top:3px}.abs-popup-close{border:0;background:transparent;font-size:22px;color:var(--ink-soft);cursor:pointer}.abs-options{padding:4px 18px 14px}.abs-option{display:flex;align-items:center;gap:10px;width:100%;padding:10px;border:1px solid var(--line-soft);border-radius:8px;background:#fff;margin:5px 0;text-align:left;cursor:pointer}.abs-option:hover{background:#f7faff}.abs-option.selected{background:#edf5ff;border-color:#9fc3ff}.abs-option .abs-status-icon{width:22px;height:22px}.abs-option-text b{display:block;font-size:12px}.abs-option-text span{font-size:10px;color:var(--ink-soft)}.abs-popup-foot{display:flex;justify-content:space-between;gap:8px;padding:12px 18px 16px;border-top:1px solid var(--line-soft)}.abs-popup-foot .btn{min-width:100px;justify-content:center}.abs-popup-foot .btn-danger{border-color:#f3a6a0}.abs-popup-foot .btn-danger:hover{background:#fff0f0}
 @media(max-width:900px){.abs-redesign{grid-template-columns:1fr}.abs-employee-list{max-height:210px}.abs-cal-day{min-height:54px}}
 
+
+#btnLogout{border-color:#f0c8c4;background:#fff8f7;color:var(--red);white-space:nowrap;}
+#btnLogout:hover{background:#fde9e7;border-color:#e8a29b;}
+.logout-modal-backdrop{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(15,23,42,.48);backdrop-filter:blur(3px);z-index:1000000;}
+.logout-modal-backdrop.open{display:flex;}
+.logout-modal{width:100%;max-width:430px;background:#fff;border:1px solid #e5eaf2;border-radius:16px;box-shadow:0 24px 70px rgba(15,23,42,.28);overflow:hidden;animation:logoutModalIn .18s ease-out;}
+@keyframes logoutModalIn{from{opacity:0;transform:translateY(8px) scale(.985)}to{opacity:1;transform:none}}
+.logout-modal-head{display:flex;align-items:center;gap:12px;padding:22px 22px 12px;}
+.logout-modal-icon{width:44px;height:44px;flex:0 0 44px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:#fff0ee;color:#c0392b;font-size:22px;font-weight:800;}
+.logout-modal-title{font-size:17px;font-weight:800;margin:0;color:#172033;}
+.logout-modal-subtitle{font-size:12px;color:#667085;margin-top:3px;}
+.logout-modal-body{padding:8px 22px 20px;color:#475467;font-size:13px;line-height:1.65;}
+.logout-modal-note{display:flex;gap:9px;background:#f4f8ff;border:1px solid #dce8fb;border-radius:10px;padding:11px 12px;margin-top:12px;font-size:12px;color:#344054;}
+.logout-modal-foot{display:flex;justify-content:flex-end;gap:9px;padding:14px 22px 20px;border-top:1px solid #eef1f5;}
+.logout-modal-foot .btn{min-width:100px;justify-content:center;padding:9px 14px;}
+#btnConfirmLogout{background:#c0392b;border-color:#c0392b;color:#fff;}
+#btnConfirmLogout:hover{background:#a92f23;}
+#btnConfirmLogout:disabled{opacity:.6;cursor:wait;}
+@media(max-width:480px){.logout-modal-foot{flex-direction:column-reverse}.logout-modal-foot .btn{width:100%;}}
+
 </style>
 </head>
 <body>
@@ -494,6 +514,7 @@ backdrop-filter:blur(2px);
 
         💾 SIMPAN
     </button>
+    <button id="btnLogout" class="btn" type="button" title="Simpan data dan kunci layar">↪ LOGOUT</button>
     </div>
 </header>
 
@@ -952,6 +973,27 @@ Belum ada titipan.
 </div>
 
 <div class="toast" id="toast"></div>
+
+<div class="logout-modal-backdrop" id="logoutModalBackdrop" role="dialog" aria-modal="true" aria-labelledby="logoutModalTitle">
+  <div class="logout-modal">
+    <div class="logout-modal-head">
+      <div class="logout-modal-icon">↪</div>
+      <div>
+        <h3 class="logout-modal-title" id="logoutModalTitle">Simpan dan Logout?</h3>
+        <div class="logout-modal-subtitle">Master Bus Payroll · Konfirmasi keamanan</div>
+      </div>
+    </div>
+    <div class="logout-modal-body">
+      Sistem akan menyimpan data payroll terbaru terlebih dahulu. Setelah penyimpanan berhasil, layar akan dikunci dan password diperlukan untuk masuk kembali.
+      <div class="logout-modal-note"><span>🔒</span><span>Jika penyimpanan gagal, Anda tetap berada di aplikasi dan dapat mencoba kembali.</span></div>
+      <div id="logoutModalStatus" style="display:none;margin-top:12px;font-weight:700;color:#b42318;"></div>
+    </div>
+    <div class="logout-modal-foot">
+      <button type="button" class="btn" id="btnCancelLogout">Batal</button>
+      <button type="button" class="btn" id="btnConfirmLogout">Simpan &amp; Logout</button>
+    </div>
+  </div>
+</div>
 
 <script>
 /* ============================= STATE ============================= */
@@ -2994,11 +3036,77 @@ function logout(){
 
     txtPassword.value="";
 
+    loginError.innerHTML="";
+
     txtPassword.focus();
 
-    alert("Sesi login telah berakhir. Silakan login kembali.");
-
 }
+const logoutModalBackdrop = document.getElementById("logoutModalBackdrop");
+const btnLogout = document.getElementById("btnLogout");
+const btnCancelLogout = document.getElementById("btnCancelLogout");
+const btnConfirmLogout = document.getElementById("btnConfirmLogout");
+const logoutModalStatus = document.getElementById("logoutModalStatus");
+
+function openLogoutModal(){
+    logoutModalStatus.style.display = "none";
+    logoutModalStatus.textContent = "";
+    btnConfirmLogout.disabled = false;
+    btnConfirmLogout.textContent = "Simpan & Logout";
+    logoutModalBackdrop.classList.add("open");
+    btnCancelLogout.focus();
+}
+function closeLogoutModal(){
+    if(isSaving) return;
+    logoutModalBackdrop.classList.remove("open");
+}
+if(btnLogout) btnLogout.addEventListener("click", openLogoutModal);
+if(btnCancelLogout) btnCancelLogout.addEventListener("click", closeLogoutModal);
+if(logoutModalBackdrop) logoutModalBackdrop.addEventListener("click", e=>{
+    if(e.target === logoutModalBackdrop) closeLogoutModal();
+});
+document.addEventListener("keydown", e=>{
+    if(e.key === "Escape" && logoutModalBackdrop.classList.contains("open")) closeLogoutModal();
+});
+
+async function saveAndLogout(){
+    if(isSaving) return;
+    isSaving = true;
+    btnConfirmLogout.disabled = true;
+    btnCancelLogout.disabled = true;
+    btnConfirmLogout.textContent = "Menyimpan...";
+    logoutModalStatus.style.display = "none";
+    showLoading();
+    try{
+        clearTimeout(saveAttTimer);
+        clearTimeout(saveTimer);
+        // Simpan seluruh data utama sebelum sesi dikunci.
+        await saveEmployees(employees);
+        const mk = monthKey(state.year, state.month);
+        await saveAttendanceData(mk, attendance[mk] || {});
+        await saveAdjustments(adjustments);
+
+        isDirty = false;
+        logoutModalBackdrop.classList.remove("open");
+        sessionStorage.removeItem("masterbus_login_time");
+        loginScreen.style.display = "flex";
+        txtPassword.value = "";
+        loginError.innerHTML = "";
+        txtPassword.focus();
+    }catch(err){
+        console.error("Gagal menyimpan data sebelum logout:", err);
+        logoutModalStatus.textContent = "Data belum berhasil disimpan. Periksa koneksi, lalu klik Coba Lagi.";
+        logoutModalStatus.style.display = "block";
+        btnConfirmLogout.disabled = false;
+        btnConfirmLogout.textContent = "Coba Lagi";
+        showToast("Gagal menyimpan data. Anda belum logout.");
+    }finally{
+        hideLoading();
+        isSaving = false;
+        btnCancelLogout.disabled = false;
+    }
+}
+if(btnConfirmLogout) btnConfirmLogout.addEventListener("click", saveAndLogout);
+
 function startSessionWatcher(){
 
     setInterval(()=>{
