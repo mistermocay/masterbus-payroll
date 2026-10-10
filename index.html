@@ -309,6 +309,35 @@ color:red;
 font-size:14px;
 }
 
+/* Transisi masuk ke dashboard setelah login berhasil */
+#loginScreen.login-transition-out{
+    animation:loginOverlayExit .85s cubic-bezier(.22,.7,.25,1) forwards;
+    pointer-events:none;
+}
+#loginScreen.login-transition-out .login-card{
+    animation:loginCardExit .48s cubic-bezier(.22,.7,.25,1) forwards;
+}
+#app.home-enter{
+    animation:homeReveal .95s cubic-bezier(.22,.7,.25,1) .12s both;
+}
+#btnLogin:disabled{opacity:.82;cursor:wait;}
+@keyframes loginOverlayExit{
+    0%{opacity:1;backdrop-filter:blur(0)}
+    100%{opacity:0;visibility:hidden;backdrop-filter:blur(8px)}
+}
+@keyframes loginCardExit{
+    0%{opacity:1;transform:translateY(0) scale(1)}
+    100%{opacity:0;transform:translateY(-16px) scale(.97)}
+}
+@keyframes homeReveal{
+    0%{opacity:0;transform:translateY(16px) scale(.992);filter:blur(3px)}
+    70%{filter:blur(0)}
+    100%{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}
+}
+@media(prefers-reduced-motion:reduce){
+    #loginScreen.login-transition-out,#loginScreen.login-transition-out .login-card,#app.home-enter{animation-duration:.01ms!important;animation-delay:0ms!important;}
+}
+
 #print-area{display:none;}
 @media print{
   #print-area{display:block;}
@@ -3003,25 +3032,33 @@ const txtPassword = document.getElementById("loginPassword");
 const loginError = document.getElementById("loginError");
 const LOGIN_DURATION = 60 * 60 * 1000; // 1 jam
 btnLogin.onclick = ()=>{
+    if(btnLogin.disabled) return;
 
     if(txtPassword.value===APP_PASSWORD){
-
         sessionStorage.setItem("masterbus_login_time", Date.now());
+        loginError.textContent = "";
+        btnLogin.disabled = true;
+        btnLogin.textContent = "MEMASUKI APLIKASI...";
 
-        loginScreen.style.display="none";
+        // Animasi dashboard dan layar login berjalan beriringan.
+        const appScreen = document.getElementById("app");
+        if(appScreen) appScreen.classList.add("home-enter");
+        loginScreen.classList.add("login-transition-out");
+
+        window.setTimeout(()=>{
+            loginScreen.style.display = "none";
+            loginScreen.classList.remove("login-transition-out");
+            if(appScreen) appScreen.classList.remove("home-enter");
+            btnLogin.disabled = false;
+            btnLogin.textContent = "MASUK";
+        }, 950);
 
         startSessionWatcher();
-
     }else{
-
-        loginError.innerHTML="Password salah!";
-
-        txtPassword.value="";
-
+        loginError.textContent = "Password salah!";
+        txtPassword.value = "";
         txtPassword.focus();
-
     }
-
 };
 txtPassword.addEventListener("keypress",e=>{
     if(e.key==="Enter"){
