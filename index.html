@@ -851,7 +851,7 @@ Belum ada titipan.
         <h2 class="section-title">Rekap UM & Lembur Mingguan</h2>
         <p class="section-sub">Rekap setor payroll mingguan.</p>
       </div>
-      <div style="display:flex;gap:8px;align-items:center;"><select id="weeklyPeriodSelect" class="slip-select" style="min-width:180px"></select><button class="btn" id="btnPrintRekapUM">🖨 Cetak Rekapan</button></div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;"><select id="weeklyPeriodSelect" class="slip-select" style="min-width:180px"></select><button class="btn" id="btnPrintRekapUM">🖨 Cetak Rekapan</button><button class="btn" id="btnExcelRekapUM" type="button">📊 Download Excel</button></div>
     </div>
     <div class="tbl-wrap card">
       <table class="tbl">
@@ -879,7 +879,7 @@ Belum ada titipan.
   <!-- REKAP -->
   <section class="panel" id="panel-rekap">
     <h2 class="section-title" style="margin-bottom:2px;">Rekap Payroll <span id="rekapMonthLabel"></span></h2>
-    <div class="row-between"><p class="section-sub">Ringkasan seluruh karyawan untuk periode terpilih.</p><button class="btn" id="btnPrintRekap">🖨 Cetak Rekapan</button></div>
+    <div class="row-between" style="gap:8px;flex-wrap:wrap;"><p class="section-sub">Ringkasan seluruh karyawan untuk periode terpilih.</p><div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn" id="btnPrintRekap">🖨 Cetak Rekapan</button><button class="btn" id="btnExcelRekap" type="button">📊 Download Excel</button></div></div>
     <div class="kpi-row" id="kpiRow"></div>
     <div class="tbl-wrap card">
       <table class="tbl" id="tblRekap">
@@ -905,11 +905,19 @@ Belum ada titipan.
                 Tidak termasuk uang makan dan lembur.
             </p>
         </div>
-        <button
-            class="btn btn-primary"
-            id="btnPrintLaporanBulanan">
-            🖨 Cetak Laporan
-        </button>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <button
+                class="btn btn-primary"
+                id="btnPrintLaporanBulanan">
+                🖨 Cetak Laporan
+            </button>
+            <button
+                class="btn"
+                id="btnExcelLaporanBulanan"
+                type="button">
+                📊 Download Excel
+            </button>
+        </div>
     </div>
     <div class="tbl-wrap card">
         <table class="tbl" id="tblLaporanBulanan">
@@ -1024,6 +1032,7 @@ Belum ada titipan.
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
 /* ============================= STATE ============================= */
 const BULAN_ID = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
@@ -2711,6 +2720,119 @@ if(btnPrintLaporanBulanan){
     );
 
 }
+
+function downloadExcelFile(rows, filename, sheetName){
+  const safeName = String(filename || 'Laporan.xlsx').replace(/[\\/:*?"<>|]/g, '_');
+  const xlsxName = safeName.toLowerCase().endsWith('.xlsx') ? safeName : safeName + '.xlsx';
+
+  // Utamakan API resmi SheetJS agar proses unduh dipicu langsung dari klik pengguna.
+  if (typeof XLSX !== 'undefined' && XLSX.utils && typeof XLSX.writeFile === 'function') {
+    try {
+      const ws = XLSX.utils.aoa_to_sheet(rows);
+      const colCount = Math.max(0, ...rows.map(row => row.length));
+      ws['!cols'] = Array.from({length: colCount}, (_, i) => ({
+        wch: Math.min(36, Math.max(14, ...rows.map(row => String(row[i] ?? '').length + 2)))
+      }));
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, String(sheetName || 'Laporan').slice(0,31));
+      XLSX.writeFile(wb, xlsxName, { compression: true });
+      return true;
+    } catch (error) {
+      console.error('SheetJS writeFile gagal, menggunakan file Excel alternatif:', error);
+    }
+  }
+
+  // Fallback offline: SpreadsheetML yang dapat dibuka langsung dengan Microsoft Excel.
+  try {
+    const xmlEscape = value => String(value ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;');
+    const xmlRows = rows.map(row => '<Row>' + row.map(value => {
+      const numeric = typeof value === 'number' && Number.isFinite(value);
+      return '<Cell><Data ss:Type="' + (numeric ? 'Number' : 'String') + '">' + xmlEscape(value) + '</Data></Cell>';
+    }).join('') + '</Row>').join('');
+    const xml = '<?xml version="1.0"?><?mso-application progid="Excel.Sheet"?>' +
+      '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">' +
+      '<Worksheet ss:Name="' + xmlEscape(String(sheetName || 'Laporan').slice(0,31)) + '"><Table>' + xmlRows + '</Table></Worksheet></Workbook>';
+    const blob = new Blob(['\ufeff', xml], {type:'application/vnd.ms-excel;charset=utf-8'});
+    const fallbackName = xlsxName.replace(/\.xlsx$/i, '.xls');
+
+    if (navigator.msSaveOrOpenBlob) {
+      navigator.msSaveOrOpenBlob(blob, fallbackName);
+      return true;
+    }
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fallbackName;
+    link.style.position = 'fixed';
+    link.style.left = '-9999px';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    // Jangan revoke terlalu cepat; beberapa browser memproses unduhan secara tertunda.
+    window.setTimeout(() => URL.revokeObjectURL(url), 60000);
+    return true;
+  } catch (error) {
+    console.error('Gagal membuat file Excel:', error);
+    alert('File Excel gagal dibuat. Silakan buka Console (F12) dan kirimkan pesan error kepada admin.');
+    return false;
+  }
+}
+
+// Export laporan pencairan gaji bulanan ke Excel.
+function exportLaporanBulananExcel(){
+    if(!employees.length){
+        alert("Belum ada data karyawan untuk diekspor.");
+        return;
+    }
+
+    const periode = BULAN_ID[state.month-1] + " " + state.year;
+    const rows = [
+        ["LAPORAN PENCAIRAN GAJI BULANAN — PT MASTER ARTHA KHARISMA"],
+        ["Periode", periode],
+        ["Keterangan", "Tidak termasuk uang makan dan lembur"],
+        [],
+        ["No", "Nama", "Bagian", "Bank", "No. Rekening", "Gaji Pokok", "BPJS", "Pot. Alpha", "Pot. Terlambat", "Pot. Setengah Hari", "Titipan Alpha", "Titipan Terlambat", "Total Potongan", "Take Home"]
+    ];
+
+    const totals = Array(9).fill(0);
+    employees.forEach((emp, index)=>{
+        const c = calcMonthly(emp, state.year, state.month);
+        const gaji = Number(emp.gajiPokok) || 0;
+        const bpjs = Number(emp.bpjs) || 0;
+        const alpha = Number(c.potTidakMasuk) || 0;
+        const terlambat = Number(c.potTerlambat) || 0;
+        const setengahHari = Number(c.potSetengahHari) || 0;
+        const titipanAlpha = Number(c.potTitipanAlpha) || 0;
+        const titipanTerlambat = Number(c.potTitipanTerlambat) || 0;
+        const totalPotongan = bpjs + alpha + terlambat + setengahHari + titipanAlpha + titipanTerlambat;
+        const takeHome = gaji - totalPotongan;
+        const values = [gaji, bpjs, alpha, terlambat, setengahHari, titipanAlpha, titipanTerlambat, totalPotongan, takeHome];
+        values.forEach((value, i)=> totals[i] += value);
+        rows.push([index + 1, emp.name || "", emp.bagian || "", emp.bankName || "", emp.rekening || "", ...values]);
+    });
+
+    rows.push([], ["", "", "", "", "TOTAL", ...totals]);
+    downloadExcelFile(
+        rows,
+        `Laporan_Pencairan_Gaji_${state.year}_${String(state.month).padStart(2,"0")}.xlsx`,
+        "Laporan Bulanan"
+    );
+}
+
+const btnExcelLaporanBulanan = document.getElementById("btnExcelLaporanBulanan");
+if(btnExcelLaporanBulanan){
+    btnExcelLaporanBulanan.addEventListener("click", function(event){
+        event.preventDefault();
+        try {
+            exportLaporanBulananExcel();
+        } catch (error) {
+            console.error("Export Laporan Bulanan gagal:", error);
+            alert("Export Excel gagal: " + (error.message || error));
+        }
+    });
+}
+
 /* ============================= README TAB ============================= */
 function renderReadme(){
   document.getElementById('ruleList').innerHTML = RULES.map((r,i)=>
@@ -3020,6 +3142,49 @@ const otDate=document.getElementById("otDate");
 if(otDate){
     otDate.value=new Date().toISOString().split("T")[0];
 }
+function exportRekapUMExcel(){
+  const periods = getPeriods(state.year, state.month);
+  const p = periods[state.umPeriodIdx] || periods[0];
+  if(!p){ alert('Periode mingguan tidak ditemukan.'); return; }
+  const rows = [
+    ['REKAP UANG MAKAN & LEMBUR MINGGUAN'],
+    ['Periode', BULAN_ID[state.month-1] + ' ' + state.year, 'UM' + (state.umPeriodIdx+1), p.start + ' - ' + p.end],
+    [],
+    ['Nama','Bagian','Bank','No. Rekening','Jumlah Hari Uang Makan','Jumlah Jam Lembur','Jumlah Jam Lembur Hari Libur','Uang Makan','Lembur','Lembur Hari Libur','Total']
+  ];
+  let tu=0, tl=0, tlm=0, tt=0;
+  employees.forEach(emp=>{
+    const c=calcRange(emp,state.year,state.month,p.start,p.end);
+    const total=(Number(c.uangMakan)||0)+(Number(c.lemburBiasaRp)||0)+(Number(c.lemburMerahRp)||0);
+    tu+=Number(c.uangMakan)||0; tl+=Number(c.lemburBiasaRp)||0; tlm+=Number(c.lemburMerahRp)||0; tt+=total;
+    rows.push([emp.name,emp.bagian,emp.bankName,emp.rekening,Number(c.cUM)||0,Number(c.jamLB)||0,Number(c.jamLM)||0,Number(c.uangMakan)||0,Number(c.lemburBiasaRp)||0,Number(c.lemburMerahRp)||0,total]);
+  });
+  rows.push([],['TOTAL','','','','','','',tu,tl,tlm,tt]);
+  downloadExcelFile(rows,`Rekap_UM_Lembur_${state.year}_${String(state.month).padStart(2,'0')}_UM${state.umPeriodIdx+1}.xlsx`,'Rekap Mingguan');
+}
+function exportRekapPayrollExcel(){
+  const rows = [
+    ['REKAP PAYROLL BULANAN'],
+    ['Periode',BULAN_ID[state.month-1] + ' ' + state.year],
+    [],
+    ['Nama','Bagian','Gaji Pokok','Potongan','Uang Makan','Lembur','Take Home Pay']
+  ];
+  let totalGaji=0,totalPot=0,totalUM=0,totalLembur=0,totalTHP=0;
+  employees.forEach(emp=>{
+    const c=calcMonthly(emp,state.year,state.month);
+    const pot=(Number(emp.bpjs)||0)+(Number(c.potTidakMasuk)||0)+(Number(c.potTerlambat)||0)+(Number(c.potSetengahHari)||0)+(Number(c.potTitipan)||0);
+    const lembur=(Number(c.lemburBiasaRp)||0)+(Number(c.lemburMerahRp)||0);
+    const gaji=Number(emp.gajiPokok)||0, um=Number(c.uangMakan)||0, thp=Number(c.total)||0;
+    totalGaji+=gaji; totalPot+=pot; totalUM+=um; totalLembur+=lembur; totalTHP+=thp;
+    rows.push([emp.name,emp.bagian,gaji,pot,um,lembur,thp]);
+  });
+  rows.push([],['TOTAL','',totalGaji,totalPot,totalUM,totalLembur,totalTHP]);
+  downloadExcelFile(rows,`Rekap_Payroll_${state.year}_${String(state.month).padStart(2,'0')}.xlsx`,'Rekap Payroll');
+}
+const btnExcelUM=document.getElementById('btnExcelRekapUM');
+if(btnExcelUM)btnExcelUM.onclick=exportRekapUMExcel;
+const btnExcelPayroll=document.getElementById('btnExcelRekap');
+if(btnExcelPayroll)btnExcelPayroll.onclick=exportRekapPayrollExcel;
 const a=document.getElementById('btnPrintRekapUM');
 if(a)a.onclick=()=>openPrintReport('panel-rekapUM','REKAP UANG MAKAN DAN LEMBUR MINGGUAN');
 const b=document.getElementById('btnPrintRekap');
