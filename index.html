@@ -1668,6 +1668,43 @@ function calcRange(emp,y,m,start,end){
   const lemburMerahRp = jamLM*lemburMerahRate(emp);
   return {cT,cSH,cA,cSD,cLN,cDL,cCT,cUM,jamLB,jamLM,potTidakMasuk,potTerlambat,potSetengahHari,uangMakan,lemburBiasaRp,lemburMerahRp};
 }
+// Perhitungan payroll bulanan dipakai oleh slip dan rekap.
+// Fungsi ini wajib tersedia sebelum renderer rekap dipanggil dari Input Lembur.
+function calcMonthly(emp,y,m){
+  const dim = daysInMonth(y,m);
+  const c = calcRange(emp,y,m,1,dim);
+  const adj = adjustments.filter(a =>
+    String(a.empId) === String(emp.id) &&
+    a.payrollKey === monthKey(y,m)
+  );
+  const potTitipanAlpha = adj.reduce((total,a)=>{
+    if((a.type||'alpha')==='alpha') return total + dailyRate(emp);
+    return total;
+  },0);
+  const potTitipanTerlambat = adj.reduce((total,a)=>{
+    if((a.type||'alpha')==='terlambat') return total + (Number(emp.potTerlambatRate)||0);
+    return total;
+  },0);
+  const potTitipan = potTitipanAlpha + potTitipanTerlambat;
+  const total = (Number(emp.gajiPokok)||0)
+    - (Number(emp.bpjs)||0)
+    - c.potTidakMasuk
+    - c.potTerlambat
+    - c.potSetengahHari
+    - potTitipan;
+  return Object.assign({total,potTitipan,potTitipanAlpha,potTitipanTerlambat},c);
+}
+
+// Notifikasi ringan yang digunakan oleh seluruh tab aplikasi.
+function showToast(msg){
+  const t=document.getElementById('toast');
+  if(!t){ console.info('[MasterBus]',msg); return; }
+  t.textContent=String(msg);
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer=setTimeout(()=>t.classList.remove('show'),2200);
+}
+
 /* ===========================================================
    INPUT LEMBUR
 =========================================================== */
@@ -1745,29 +1782,73 @@ async function saveOvertime(){
   if(!empId){alert('Pilih karyawan.');return;}
   if(!date){alert('Pilih tanggal.');return;}
   if(!Number.isFinite(jam)||jam<=0){alert('Masukkan jumlah jam yang valid.');return;}
+
+  const [year,month,day]=date.split('-').map(Number);
+  if(!year||!month||!day||month<1||month>12||day<1||day>daysInMonth(year,month)){
+    alert('Tanggal lembur tidak valid.');return;
+  }
+  const mk=monthKey(year,month), empKey=String(empId);
+  const oldMk=editingOvertime?monthKey(editingOvertime.year,editingOvertime.month):mk;
+  const oldEmpKey=editingOvertime?String(editingOvertime.empId):empKey;
+  const oldDay=editingOvertime?editingOvertime.day:day;
+  const oldRec=attendance[oldMk]?.[oldEmpKey]?.[oldDay];
+  const oldSnapshot=oldRec?{...oldRec}:null;
+  const targetExisted=!!attendance[mk]?.[empKey]?.[day];
+  const targetSnapshot=targetExisted?{...attendance[mk][empKey][day]}:null;
+
   isSaving=true; showLoading();
   try{
-    const [year,month,day]=date.split('-').map(Number);
-    const mk=monthKey(year,month);
     if(!attendance[mk]) attendance[mk]={};
-    if(!attendance[mk][empId]) attendance[mk][empId]={};
-    if(!attendance[mk][empId][day]) attendance[mk][empId][day]={kode:'',lb:0,lm:0};
-    const rec=attendance[mk][empId][day];
+    if(!attendance[mk][empKey]) attendance[mk][empKey]={};
+    if(!attendance[mk][empKey][day]) attendance[mk][empKey][day]={kode:'',lb:0,lm:0};
+    const rec=attendance[mk][empKey][day];
     const dt=new Date(year,month-1,day);
     const field=editingOvertime?editingOvertime.field:(isHoliday(dt)?'lm':'lb');
-    if(editingOvertime){
-      const old=attendance[monthKey(editingOvertime.year,editingOvertime.month)]?.[editingOvertime.empId]?.[editingOvertime.day];
-      if(old) old[editingOvertime.field]=0;
-      rec[field]=(Number(rec[field])||0)+jam;
-    }else rec[field]=(Number(rec[field])||0)+jam;
+
+    if(editingOvertime && oldRec){
+      oldRec[editingOvertime.field]=0;
+      // Bila tanggal/periode tujuan berbeda, tulis perubahan sumber juga.
+      if(oldMk!==mk){
+        await saveAttendanceData(oldMk,attendance[oldMk]||{});
+      }
+    }
+    rec[field]=(Number(rec[field])||0)+jam;
     await saveAttendanceData(mk,attendance[mk]);
+
+    // Muat ulang periode yang sedang ditampilkan agar cache dan angka tetap sinkron.
     await loadAttendance(state.year,state.month);
-    renderAbsensi(); renderSlipUM(); renderRekapUM(); renderRekap();
+    if(state.tab==='absensi') renderAbsensi();
+    if(state.tab==='slipUM') renderSlipUM();
+    if(state.tab==='rekapUM') renderRekapUM();
+    if(state.tab==='rekap') renderRekap();
+    renderOvertimeManager();
+
+    const wasEditing=!!editingOvertime;
     document.getElementById('otInfo').style.display='block';
-    document.getElementById('otInfo').innerHTML=`✅ <strong>Lembur berhasil ${editingOvertime?'diperbarui':'disimpan'}.</strong><br>Tanggal: ${formatOTDate(date)}<br>Jenis: ${field==='lm'?'Hari Libur / Tanggal Merah':'Hari Kerja'}<br>Jam: <strong>${jam}</strong>`;
-    resetOvertimeForm(); renderOvertimeManager(); showToast('Lembur berhasil disimpan.');
-  }catch(err){console.error(err);alert('Gagal menyimpan data ke Firebase.');}
-  finally{hideLoading();isSaving=false;}
+    document.getElementById('otInfo').innerHTML=`✅ <strong>Lembur berhasil ${wasEditing?'diperbarui':'disimpan'}.</strong><br>Tanggal: ${formatOTDate(date)}<br>Jenis: ${field==='lm'?'Hari Libur / Tanggal Merah':'Hari Kerja'}<br>Jam: <strong>${jam}</strong>`;
+    resetOvertimeForm();
+    renderOvertimeManager();
+    showToast(wasEditing?'Data lembur berhasil diperbarui.':'Lembur berhasil disimpan.');
+  }catch(err){
+    // Pulihkan cache lokal agar tampilan tidak menganggap data gagal sebagai tersimpan.
+    if(oldSnapshot){
+      attendance[oldMk]=attendance[oldMk]||{};
+      attendance[oldMk][oldEmpKey]=attendance[oldMk][oldEmpKey]||{};
+      attendance[oldMk][oldEmpKey][oldDay]={...oldSnapshot};
+    }
+    if(targetSnapshot){
+      attendance[mk]=attendance[mk]||{};
+      attendance[mk][empKey]=attendance[mk][empKey]||{};
+      attendance[mk][empKey][day]={...targetSnapshot};
+    }else if(attendance[mk]?.[empKey]){
+      delete attendance[mk][empKey][day];
+    }
+    console.error('Gagal menyimpan data lembur:',err);
+    alert('Gagal menyimpan data lembur ke Firebase. Detail error tersedia di Console.');
+  }finally{
+    hideLoading();
+    isSaving=false;
+  }
 }
 async function editOvertimeRecord(empId,date,field,hours){
   const [year,month,day]=date.split('-').map(Number);
