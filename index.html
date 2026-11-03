@@ -1805,17 +1805,54 @@ function showConfirmModal({title='Konfirmasi tindakan',message='Apakah Anda yaki
 }
 
 async function deleteOvertimeRecord(empId,date,field){
-  if(!await showConfirmModal({title:'Hapus catatan lembur?',message:'Catatan lembur yang dipilih akan dihapus dari periode ini. Tindakan ini tidak dapat dibatalkan.',confirmText:'Ya, hapus',icon:'🗑'})) return;
-  const [year,month,day]=date.split('-').map(Number), mk=monthKey(year,month);
+  const approved = await showConfirmModal({
+    title:'Hapus catatan lembur?',
+    message:'Catatan lembur yang dipilih akan dihapus dari periode ini. Tindakan ini tidak dapat dibatalkan.',
+    confirmText:'Ya, hapus',
+    icon:'🗑'
+  });
+  if(!approved) return;
+
+  const [year,month,day]=String(date).split('-').map(Number);
+  const mk=monthKey(year,month);
+  const empKey=String(empId);
+  const rec=attendance[mk]?.[empKey]?.[day];
+
+  // Data pada tabel lembur berasal dari cache periode aktif. Jangan memanggil
+  // loadAttendance() di sini karena versi database.js yang sedang terpasang
+  // tidak menyediakan loadAttendanceData() pada window.
+  if(!rec){
+    showToast('Data lembur tidak ditemukan di memori. Muat ulang periode, lalu coba lagi.');
+    return;
+  }
+
+  const previousValue=Number(rec[field])||0;
+  if(previousValue<=0){
+    showToast('Catatan lembur ini sudah tidak tersedia.');
+    renderOvertimeManager();
+    return;
+  }
+
   try{
-    if(!attendance[mk]) await loadAttendance(year,month);
-    const rec=attendance[mk]?.[empId]?.[day]; if(!rec) return;
+    showLoading();
     rec[field]=0;
-    await saveAttendanceData(mk,attendance[mk]);
-    await loadAttendance(state.year,state.month);
-    renderAbsensi(); renderSlipUM(); renderRekapUM(); renderRekap(); renderOvertimeManager();
+    await saveAttendanceData(mk,attendance[mk]||{});
+
+    // Perbarui hanya tampilan lembur. Hindari renderer rekap lain yang pada
+    // file ini memanggil calcMonthly(), sementara fungsi tersebut tidak ada.
+    if(year===Number(state.year) && month===Number(state.month)){
+      renderOvertimeManager();
+    }
     showToast('Data lembur berhasil dihapus.');
-  }catch(err){console.error(err);alert('Gagal menghapus data lembur.');}
+  }catch(err){
+    // Kembalikan nilai lokal jika penyimpanan Firebase benar-benar gagal.
+    rec[field]=previousValue;
+    console.error('Gagal menghapus data lembur:',err);
+    showToast('Gagal menghapus data lembur. Periksa koneksi Firebase lalu coba lagi.');
+    renderOvertimeManager();
+  }finally{
+    hideLoading();
+  }
 }
 
 function populateOvertimeEmployee(){
