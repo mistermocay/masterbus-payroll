@@ -122,6 +122,29 @@
   .field input:focus,.field select:focus{outline:2px solid var(--teal);outline-offset:-1px;}
   .field-hint{font-size:11px;color:var(--ink-soft);margin-top:4px;}
   .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:0 14px;}
+  .leave-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px 0 18px;}
+  .leave-kpi{background:#f8fbff;border:1px solid var(--line);border-radius:12px;padding:14px 16px;}
+  .leave-kpi strong{display:block;font:700 23px 'IBM Plex Mono',monospace;color:var(--teal);margin-top:5px;}
+  .leave-kpi span{font-size:12px;color:var(--ink-soft);}
+  .leave-layout{display:grid;grid-template-columns:minmax(0,2.15fr) minmax(290px,.85fr);gap:16px;align-items:start;}
+  .leave-panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;box-shadow:0 2px 8px rgba(20,50,90,.04);}
+  .leave-panel h3{font-size:16px;margin:0 0 12px;}
+  .leave-table-wrap{overflow:auto;border:1px solid var(--line);border-radius:9px;}
+  .leave-table{min-width:680px;}
+  .leave-table input{width:92px;padding:7px 8px;border:1px solid var(--line);border-radius:7px;text-align:center;font:600 13px 'IBM Plex Mono',monospace;}
+  .leave-balance{font:700 13px 'IBM Plex Mono',monospace;color:var(--teal);}
+  .leave-negative{color:var(--red);}
+  .leave-form .field{margin-bottom:12px;}
+  .leave-form .field label{color:var(--ink);font-size:12px;}
+  .leave-radio{display:flex;gap:8px;align-items:center;margin:7px 0;font-size:13px;}
+  .leave-radio input{width:auto;}
+  .leave-history{margin-top:16px;}
+  .leave-history table{min-width:850px;}
+  .leave-pill{display:inline-block;padding:3px 8px;border-radius:20px;background:var(--teal-dim);color:var(--teal);font-size:11px;font-weight:700;}
+  .leave-pill.auto{background:#e8f8ed;color:#167344;}
+  .leave-toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
+  @media(max-width:900px){.leave-layout{grid-template-columns:1fr;}}
+  @media(max-width:640px){.grid-2{grid-template-columns:1fr;}.leave-summary{grid-template-columns:1fr;}}
 
   .modal-backdrop{
     position:fixed;inset:0;background:rgba(20,26,23,.45);display:none;align-items:flex-start;justify-content:center;
@@ -558,6 +581,7 @@ backdrop-filter:blur(2px);
     <button data-tab="laporanBulanan">Laporan Bulanan</button>
     <button data-tab="readme">Aturan</button>
     <button data-tab="titipan">Titipan Potongan</button>
+    <button data-tab="cuti">Cuti</button>
   </nav>
 
   <!-- KARYAWAN -->
@@ -962,6 +986,82 @@ Belum ada titipan.
     </div>
 </section>
 
+  <!-- CUTI -->
+  <section class="panel" id="panel-cuti">
+    <div class="card card-pad">
+      <div class="row-between" style="gap:14px;align-items:center;flex-wrap:wrap">
+        <div>
+          <h2 class="section-title">Manajemen Cuti Karyawan</h2>
+          <p class="section-sub" style="margin-bottom:0">Kelola sisa cuti tahunan karyawan. Saldo otomatis berkurang saat absensi menggunakan status CT (Cuti).</p>
+        </div>
+        <div class="tag">ⓘ Otomatis mengurangi 1 hari untuk setiap absensi CT</div>
+      </div>
+      <div class="leave-summary">
+        <div class="leave-kpi"><span>Total Karyawan</span><strong id="cutiTotalEmp">0</strong></div>
+        <div class="leave-kpi"><span>Sisa Cuti (Total)</span><strong id="cutiTotalSaldo">0 hari</strong></div>
+        <div class="leave-kpi"><span>Rata-rata Sisa Cuti</span><strong id="cutiAverage">0 hari</strong></div>
+      </div>
+
+      <div class="leave-layout">
+        <div class="leave-panel">
+          <div class="leave-toolbar">
+            <h3>Daftar Sisa Cuti Karyawan</h3>
+            <div style="display:flex;align-items:center;gap:8px">
+              <label for="cutiYear" style="font-size:12px;color:var(--ink-soft)">Tahun Cuti</label>
+              <select id="cutiYear" class="btn" style="min-width:85px"></select>
+            </div>
+          </div>
+          <div class="leave-table-wrap">
+            <table class="tbl leave-table">
+              <thead><tr><th>No</th><th>Nama Karyawan</th><th>Bagian</th><th>Sisa Cuti</th><th>Aksi</th></tr></thead>
+              <tbody id="cutiTableBody"></tbody>
+            </table>
+          </div>
+          <p class="field-hint" id="cutiListInfo" style="margin:10px 0 0"></p>
+        </div>
+
+        <div class="leave-panel leave-form">
+          <h3>✎ Penyesuaian Cuti (Manual)</h3>
+          <p class="field-hint" style="margin:-5px 0 14px">Gunakan untuk memperbarui saldo berdasarkan keputusan HRD atau koreksi data.</p>
+          <div class="field">
+            <label for="cutiEmpSelect">Karyawan</label>
+            <select id="cutiEmpSelect"></select>
+          </div>
+          <div class="field">
+            <label>Jenis Penyesuaian</label>
+            <label class="leave-radio"><input type="radio" name="cutiAdjustMode" value="set" checked> Set Sisa Cuti (Mengganti saldo)</label>
+            <label class="leave-radio"><input type="radio" name="cutiAdjustMode" value="add"> Tambah / Kurangi Cuti</label>
+          </div>
+          <div class="field">
+            <label for="cutiAdjustValue" id="cutiAdjustValueLabel">Sisa Cuti Baru</label>
+            <div style="display:flex;gap:8px;align-items:center">
+              <input id="cutiAdjustValue" type="number" min="-999" max="999" step="0.5" value="12" style="flex:1;min-width:0">
+              <span class="btn" style="pointer-events:none">hari</span>
+            </div>
+          </div>
+          <div class="field">
+            <label for="cutiAdjustNote">Keterangan (opsional)</label>
+            <textarea id="cutiAdjustNote" rows="3" placeholder="Misal: Penyesuaian sisa cuti dari HRD" style="width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:7px;font:inherit"></textarea>
+          </div>
+          <button class="btn btn-primary" id="btnSaveCutiAdjust" style="width:100%">▣ Simpan Penyesuaian</button>
+        </div>
+      </div>
+
+      <div class="leave-panel leave-history">
+        <div class="leave-toolbar">
+          <h3>▣ Riwayat Perubahan Cuti</h3>
+          <span class="field-hint" style="margin:0">Riwayat manual dan pemakaian cuti otomatis</span>
+        </div>
+        <div class="leave-table-wrap">
+          <table class="tbl">
+            <thead><tr><th>Tanggal</th><th>Karyawan</th><th>Jenis</th><th>Perubahan</th><th>Sisa Cuti</th><th>Keterangan</th></tr></thead>
+            <tbody id="cutiHistoryBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- README -->
   <section class="panel" id="panel-readme">
     <div class="card card-pad">
@@ -1057,6 +1157,7 @@ const RULES = [
  "SH mendapat Uang Makan, potongan 1/2 hari gaji.",
  "A dipotong 1 hari gaji dan tidak mendapat Uang Makan.",
  "SD/LN/DL/CT mendapat gaji penuh tetapi tidak mendapat Uang Makan.",
+ "Saldo cuti dikelola per tahun; setiap absensi CT yang disimpan mengurangi saldo 1 hari dan perubahan/penghapusan CT mengembalikan saldo.",
  "Lembur hari kerja = Rp20.000/jam.",
  "Lembur hari libur/tanggal merah = ((Gaji Pokok/26)×2)/8 per jam.",
 ];
@@ -1067,6 +1168,7 @@ let savePromise = null;
 let isDirty = false;
 let attendance = {}; // { "YYYY-M": { empId: { day: {kode,lb,lm} } } }
 let adjustments = [];
+let cutiBalanceDirty = false;
 
 const NOW = new Date();
 let state = {
@@ -1086,7 +1188,8 @@ let state = {
 
     empBulananId:null,
 
-    umPeriodIdx:0
+    umPeriodIdx:0,
+    cutiYear:NOW.getFullYear()
 };
 
 const SEED_EMPLOYEES = [
@@ -1141,6 +1244,52 @@ function monthKey(year, month) {
 
 }
 
+function getCutiBalance(emp, year=state.year){
+    if(!emp) return 0;
+    if(!emp.cutiSaldoByYear || typeof emp.cutiSaldoByYear !== 'object') emp.cutiSaldoByYear = {};
+    const value = Number(emp.cutiSaldoByYear[String(year)]);
+    return Number.isFinite(value) ? value : 0;
+}
+
+function setCutiBalance(emp, year, value){
+    if(!emp.cutiSaldoByYear || typeof emp.cutiSaldoByYear !== 'object') emp.cutiSaldoByYear = {};
+    emp.cutiSaldoByYear[String(year)] = Math.max(-9999, Number(value)||0);
+    cutiBalanceDirty = true;
+}
+
+function addCutiHistory(emp, year, entry){
+    if(!emp.cutiRiwayatByYear || typeof emp.cutiRiwayatByYear !== 'object') emp.cutiRiwayatByYear = {};
+    if(!Array.isArray(emp.cutiRiwayatByYear[String(year)])) emp.cutiRiwayatByYear[String(year)] = [];
+    emp.cutiRiwayatByYear[String(year)].unshift({
+        id:'cuti_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),
+        timestamp:new Date().toISOString(),
+        ...entry
+    });
+    // Batasi riwayat per karyawan/tahun agar dokumen Firestore tetap terkendali.
+    emp.cutiRiwayatByYear[String(year)] = emp.cutiRiwayatByYear[String(year)].slice(0,300);
+    cutiBalanceDirty = true;
+}
+
+function applyCutiTransition(empId, year, oldCode, newCode){
+    const wasCuti = oldCode === 'CT';
+    const isCuti = newCode === 'CT';
+    if(wasCuti === isCuti) return false;
+    const emp = employees.find(e=>e.id===empId);
+    if(!emp) return false;
+    const before = getCutiBalance(emp, year);
+    const after = before + (isCuti ? -1 : 1);
+    setCutiBalance(emp, year, after);
+    addCutiHistory(emp, year, {
+        type:'auto',
+        change:isCuti ? -1 : 1,
+        before,
+        after,
+        description:isCuti ? 'Pemakaian 1 hari (Cuti)' : 'Pengembalian 1 hari (CT dibatalkan)',
+        note:isCuti ? 'Pemakaian cuti melalui absensi' : 'Pembatalan/pengubahan status absensi CT'
+    });
+    return true;
+}
+
 async function loadAttendance(year, month) {
 
     const key = monthKey(year, month);
@@ -1161,6 +1310,10 @@ function saveAttendance(y,m){
         const key = monthKey(y,m);
         try{
             await saveAttendanceData(key, attendance[key] || {});
+            if(cutiBalanceDirty){
+                await saveEmployees(employees);
+                cutiBalanceDirty = false;
+            }
             isDirty = false;
         }catch(err){
             console.error('Gagal menyimpan absensi otomatis:', err);
@@ -1193,7 +1346,12 @@ async function saveCurrentTab(){
             mk,
             attendance[mk] || {}
         );
+        if(cutiBalanceDirty){ await saveEmployees(employees); cutiBalanceDirty=false; }
 
+    }
+    else if(state.tab==="cuti"){
+        await saveEmployees(employees);
+        cutiBalanceDirty=false;
     }
 
     else if(state.tab==="lembur"){
@@ -1228,7 +1386,12 @@ async function saveCurrentTab(){
             mk,
             attendance[mk] || {}
         );
+        if(cutiBalanceDirty){ await saveEmployees(employees); cutiBalanceDirty=false; }
 
+    }
+    else if(state.tab==="cuti"){
+        await saveEmployees(employees);
+        cutiBalanceDirty=false;
     }
 
     else if(state.tab==="lembur"){
@@ -1595,6 +1758,9 @@ async function renderActiveTab(){
     else if(state.tab==="titipan"){
         renderAdjustments();
     }
+    else if(state.tab==="cuti"){
+        renderCuti();
+    }
     else if(state.tab==='slipBulanan'){
         await loadAttendance(state.year,state.month);
         renderSlipBulanan();
@@ -1832,6 +1998,7 @@ async function saveAbsPopup(){
   const month = state.month;
   const key = monthKey(year, month);
   const rec = getAttRec(year, month, state.absEmpId, state.absPopup.day);
+  applyCutiTransition(state.absEmpId, year, rec.kode || '', state.absPopup.code);
   rec.kode = state.absPopup.code;
   isDirty = true;
 
@@ -1844,6 +2011,7 @@ async function saveAbsPopup(){
 
   try{
     await saveAttendanceData(key, attendance[key] || {});
+    if(cutiBalanceDirty){ await saveEmployees(employees); cutiBalanceDirty = false; }
     isDirty = false;
     closeAbsPopup();
     renderAbsensiCalendar();
@@ -1864,6 +2032,7 @@ async function deleteAbsPopup(){
   const month = state.month;
   const key = monthKey(year, month);
   const rec = getAttRec(year, month, state.absEmpId, state.absPopup.day);
+  applyCutiTransition(state.absEmpId, year, rec.kode || '', '');
   rec.kode = '';
   rec.lb = 0;
   rec.lm = 0;
@@ -1874,6 +2043,7 @@ async function deleteAbsPopup(){
 
   try{
     await saveAttendanceData(key, attendance[key] || {});
+    if(cutiBalanceDirty){ await saveEmployees(employees); cutiBalanceDirty = false; }
     isDirty = false;
     closeAbsPopup();
     renderAbsensiCalendar();
@@ -1949,10 +2119,13 @@ function onAttChange(e){
         day
     );
 
-    if(field==="kode")
+    if(field==="kode"){
+        const oldCode = rec.kode || '';
+        applyCutiTransition(empId, state.year, oldCode, el.value);
         rec.kode = el.value;
-    else
+    }else{
         rec[field] = Number(el.value||0);
+    }
 
     // ============================
     // ADA PERUBAHAN DATA
@@ -1986,7 +2159,7 @@ document.getElementById('absPopupSave')?.addEventListener('click', saveAbsPopup)
 document.getElementById('absPopupDelete')?.addEventListener('click', deleteAbsPopup);
 document.getElementById('absPopupBackdrop')?.addEventListener('click', e=>{if(e.target.id==='absPopupBackdrop')closeAbsPopup();});
 document.getElementById('absMarkAllPresent')?.addEventListener('click', async ()=>{
-  if(!state.absEmpId)return; const dim=daysInMonth(state.year,state.month); for(let d=1;d<=dim;d++){if(new Date(state.year,state.month-1,d).getDay()!==0)getAttRec(state.year,state.month,state.absEmpId,d).kode='';} isDirty=true; await saveAttendanceData(monthKey(state.year,state.month),attendance[monthKey(state.year,state.month)]||{}); renderAbsensiCalendar();renderAbsensiTable();showToast('Semua hari kerja ditandai hadir.');
+  if(!state.absEmpId)return; const dim=daysInMonth(state.year,state.month); for(let d=1;d<=dim;d++){if(new Date(state.year,state.month-1,d).getDay()!==0){const rec=getAttRec(state.year,state.month,state.absEmpId,d);applyCutiTransition(state.absEmpId,state.year,rec.kode||'','');rec.kode='';}} isDirty=true; await saveAttendanceData(monthKey(state.year,state.month),attendance[monthKey(state.year,state.month)]||{}); if(cutiBalanceDirty){await saveEmployees(employees);cutiBalanceDirty=false;} renderAbsensiCalendar();renderAbsensiTable();showToast('Semua hari kerja ditandai hadir.');
 });
 document.getElementById('absMarkWeekOff')?.addEventListener('click', ()=>showToast('Minggu sudah otomatis dianggap hari libur.'));
 document.getElementById('absApplyLeave')?.addEventListener('click', ()=>showToast('Untuk CT, klik tanggal pada kalender lalu pilih Cuti.'));
@@ -2875,6 +3048,138 @@ function renderRekapUM(){
   <td class="num">${rupiah(tt)}</td>
   </tr>`;
   document.getElementById('weeklyRekapBody').innerHTML=body;
+}
+function renderCuti(){
+    const yearSelect = document.getElementById('cutiYear');
+    if(!yearSelect) return;
+    if(!yearSelect.dataset.ready){
+        for(let y=2024;y<=2035;y++){
+            const opt=document.createElement('option'); opt.value=y; opt.textContent=y; yearSelect.appendChild(opt);
+        }
+        yearSelect.dataset.ready='1';
+        yearSelect.addEventListener('change', ()=>{state.cutiYear=Number(yearSelect.value);renderCuti();});
+    }
+    yearSelect.value=String(state.cutiYear);
+    const year=Number(yearSelect.value);
+    const body=document.getElementById('cutiTableBody');
+    const sortedEmployees=[...employees].sort((a,b)=>(a.name||'').localeCompare(b.name||'','id'));
+    if(!sortedEmployees.length){
+        body.innerHTML='<tr><td colspan="5"><div class="empty-state">Belum ada data karyawan.</div></td></tr>';
+    }else{
+        body.innerHTML=sortedEmployees.map((emp,i)=>{
+            const saldo=getCutiBalance(emp,year);
+            return `<tr>
+                <td>${i+1}</td>
+                <td><strong>${esc(emp.name)}</strong></td>
+                <td>${esc(emp.bagian||'-')}</td>
+                <td><span class="leave-balance ${saldo<0?'leave-negative':''}">${saldo} hari</span></td>
+                <td><button class="btn btn-sm" data-pick-cuti="${esc(emp.id)}">✎ Ubah</button></td>
+            </tr>`;
+        }).join('');
+        body.querySelectorAll('[data-pick-cuti]').forEach(btn=>btn.addEventListener('click',()=>{
+            const select=document.getElementById('cutiEmpSelect');
+            select.value=btn.dataset.pickCuti;
+            document.getElementById('cutiAdjustValue').value=getCutiBalance(employees.find(e=>e.id===select.value),year);
+            document.getElementById('cutiAdjustValueLabel').textContent='Sisa Cuti Baru';
+            document.querySelector('input[name="cutiAdjustMode"][value="set"]').checked=true;
+            document.getElementById('cutiAdjustNote').focus();
+        }));
+    }
+
+    const empSelect=document.getElementById('cutiEmpSelect');
+    if(empSelect){
+        const selected=empSelect.value;
+        empSelect.innerHTML=sortedEmployees.map(e=>`<option value="${esc(e.id)}">${esc(e.name)} — ${esc(e.bagian||'-')}</option>`).join('');
+        if(sortedEmployees.some(e=>e.id===selected)) empSelect.value=selected;
+        else if(sortedEmployees.length) empSelect.value=sortedEmployees[0].id;
+    }
+
+    const total=employees.reduce((sum,e)=>sum+getCutiBalance(e,year),0);
+    document.getElementById('cutiTotalEmp').textContent=employees.length;
+    document.getElementById('cutiTotalSaldo').textContent=total+' hari';
+    document.getElementById('cutiAverage').textContent=(employees.length?(total/employees.length).toFixed(1).replace('.',','):'0')+' hari';
+    document.getElementById('cutiListInfo').textContent=`Menampilkan ${employees.length} karyawan`;
+
+    const history=[];
+    employees.forEach(emp=>{
+        const rows=emp.cutiRiwayatByYear?.[String(year)];
+        if(Array.isArray(rows)) rows.forEach(item=>history.push({...item,empName:emp.name}));
+    });
+    history.sort((a,b)=>new Date(b.timestamp||0)-new Date(a.timestamp||0));
+    const historyBody=document.getElementById('cutiHistoryBody');
+    historyBody.innerHTML=history.length?history.slice(0,200).map(item=>{
+        const date=item.timestamp?new Date(item.timestamp).toLocaleString('id-ID',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}):'-';
+        const manual=item.type==='manual';
+        const change=Number(item.change)||0;
+        const changeText=manual?(item.mode==='set'?`Set sisa cuti → ${item.after} hari`:`${change>0?'+':''}${change} hari`):`${change>0?'+':''}${change} hari (${item.description||'Pemakaian Cuti'})`;
+        return `<tr>
+            <td>${esc(date)}</td>
+            <td>${esc(item.empName||'-')}</td>
+            <td><span class="leave-pill ${manual?'':'auto'}">${manual?'Penyesuaian Manual':'Pemakaian (Absensi)'}</span></td>
+            <td>${esc(changeText)}</td>
+            <td><strong>${Number(item.after)||0} hari</strong></td>
+            <td>${esc(item.note||'-')}</td>
+        </tr>`;
+    }).join(''):'<tr><td colspan="6" style="text-align:center;color:var(--ink-soft)">Belum ada riwayat perubahan cuti pada tahun ini.</td></tr>';
+
+    const saveBtn=document.getElementById('btnSaveCutiAdjust');
+    if(saveBtn && !saveBtn.dataset.bound){
+        saveBtn.dataset.bound='1';
+        saveBtn.addEventListener('click',async()=>{
+            const emp=employees.find(e=>e.id===empSelect.value);
+            if(!emp){showToast('Pilih karyawan terlebih dahulu.');return;}
+            const value=Number(document.getElementById('cutiAdjustValue').value);
+            if(!Number.isFinite(value)||value < -999||value>999){showToast('Masukkan jumlah cuti yang valid.');return;}
+            const mode=document.querySelector('input[name="cutiAdjustMode"]:checked')?.value||'set';
+            const before=getCutiBalance(emp,year);
+            const after=mode==='add'?before+value:value;
+            if(!Number.isFinite(after)||after < -9999||after>9999){showToast('Saldo akhir berada di luar batas.');return;}
+            if(after===before){showToast('Tidak ada perubahan saldo cuti.');return;}
+            const note=document.getElementById('cutiAdjustNote').value.trim();
+            setCutiBalance(emp,year,after);
+            addCutiHistory(emp,year,{
+                type:'manual',mode,change:after-before,before,after,
+                description:mode==='set'?'Set sisa cuti':'Tambah / kurangi cuti',
+                note:note||'Penyesuaian manual'
+            });
+            saveBtn.disabled=true;saveBtn.textContent='Menyimpan...';
+            try{
+                await saveEmployees(employees);cutiBalanceDirty=false;
+                document.getElementById('cutiAdjustNote').value='';
+                document.getElementById('cutiAdjustValue').value=after;
+                renderCuti();
+                showToast(`Saldo cuti ${emp.name} berhasil diperbarui menjadi ${after} hari.`);
+            }catch(err){
+                console.error('Gagal menyimpan penyesuaian cuti:',err);
+                setCutiBalance(emp,year,before);
+                const list=emp.cutiRiwayatByYear?.[String(year)];
+                if(Array.isArray(list)) emp.cutiRiwayatByYear[String(year)]=list.filter(x=>x.type!=='manual'||x.after!==after||x.before!==before);
+                cutiBalanceDirty=false;
+                showToast('Gagal menyimpan penyesuaian cuti. Coba lagi.');
+            }finally{
+                saveBtn.disabled=false;saveBtn.textContent='▣ Simpan Penyesuaian';
+            }
+        });
+    }
+
+    document.querySelectorAll('input[name="cutiAdjustMode"]').forEach(radio=>{
+        if(!radio.dataset.bound){
+            radio.dataset.bound='1';
+            radio.addEventListener('change',()=>{
+                const mode=document.querySelector('input[name="cutiAdjustMode"]:checked')?.value;
+                document.getElementById('cutiAdjustValueLabel').textContent=mode==='add'?'Jumlah Tambah / Kurangi':'Sisa Cuti Baru';
+                const emp=employees.find(e=>e.id===empSelect.value);
+                document.getElementById('cutiAdjustValue').value=mode==='add'?0:getCutiBalance(emp,year);
+            });
+        }
+    });
+    if(empSelect && !empSelect.dataset.changeBound){
+        empSelect.dataset.changeBound='1';
+        empSelect.addEventListener('change',()=>{
+            const mode=document.querySelector('input[name="cutiAdjustMode"]:checked')?.value;
+            if(mode!=='add') document.getElementById('cutiAdjustValue').value=getCutiBalance(employees.find(e=>e.id===empSelect.value),state.cutiYear);
+        });
+    }
 }
 function renderAdjustments(){
     populateEmpSelects();
