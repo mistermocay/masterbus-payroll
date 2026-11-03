@@ -530,6 +530,88 @@ backdrop-filter:blur(2px);
 #btnConfirmLogout:disabled{opacity:.6;cursor:wait;}
 @media(max-width:480px){.logout-modal-foot{flex-direction:column-reverse}.logout-modal-foot .btn{width:100%;}}
 
+
+  /* ---------- OVERTIME DASHBOARD ---------- */
+  .ot-page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin:4px 0 18px}
+  .ot-page-head h2{font-size:23px;margin:0 0 5px;color:#172b4d}.ot-page-head p{margin:0;color:#718096;font-size:13px}
+  .ot-page-period{display:flex;align-items:center;gap:8px;padding:9px 13px;border:1px solid #dce6f5;border-radius:10px;background:#fff;color:#41536d;font-size:12px;font-weight:700}
+  .ot-summary-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin-bottom:16px}
+  .ot-summary{display:flex;align-items:center;gap:13px;padding:16px 18px;background:#fff;border:1px solid #e2eaf5;border-radius:13px;box-shadow:0 3px 12px rgba(28,65,120,.045)}
+  .ot-summary-icon{width:42px;height:42px;display:grid;place-items:center;border-radius:12px;background:#edf4ff;color:#2463c7;font-size:21px;flex:0 0 auto}
+  .ot-summary:nth-child(2) .ot-summary-icon{background:#eaf8ef;color:#16804a}.ot-summary:nth-child(3) .ot-summary-icon{background:#fff4e3;color:#b87912}
+  .ot-summary span{display:block;color:#748198;font-size:11px;margin-bottom:3px}.ot-summary strong{display:block;color:#1d2e49;font-size:23px;line-height:1.1}
+  .ot-workspace{display:grid;grid-template-columns:minmax(300px,.85fr) minmax(0,1.5fr);gap:15px;align-items:stretch;margin-bottom:16px}
+  .ot-entry-card,.ot-manager-card,.ot-employee-card{padding:20px;margin-bottom:16px;border-radius:14px;border:1px solid #e0e9f5;background:#fff;box-shadow:0 4px 14px rgba(28,65,120,.055)}
+  .ot-section-heading,.ot-manager-head{display:flex;align-items:flex-start;justify-content:space-between;gap:15px;margin-bottom:16px}
+  .ot-section-heading .section-sub,.ot-manager-head .section-sub{margin-bottom:0}
+  .ot-heading-icon{width:43px;height:43px;display:grid;place-items:center;border-radius:12px;background:#eaf1ff;color:#2463c7;font-size:24px;font-weight:700;flex:0 0 auto}
+  .ot-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 13px;align-items:end}
+  .ot-form-grid .field{margin-bottom:12px}.ot-form-grid .field label{font-size:12px;color:#52627a}
+  .ot-form-grid .field input,.ot-form-grid .field select{height:43px;border-radius:8px;padding:9px 11px;font-size:13px;border:1px solid #d4dfed}
+  .ot-submit-field .btn{height:43px;width:100%;justify-content:center;border-radius:8px;font-size:13px}
+  .ot-info{margin-top:10px;padding:11px 13px;border-radius:9px;background:#edf5ff;color:#24466f;border:1px solid #d7e7ff;line-height:1.65;font-size:12px}
+  .ot-employee-card{margin:0;min-width:0}.ot-employee-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+  .ot-employee-head h3{font-size:15px;margin:0;color:#263a59}.ot-employee-head small{font-size:11px;color:#8190a5}
+  .ot-employee-layout{display:grid;grid-template-columns:minmax(155px,.75fr) minmax(0,1.25fr);gap:12px;min-height:250px}
+  .ot-employee-list{border:1px solid #e7edf5;border-radius:10px;padding:6px;max-height:275px;overflow:auto}
+  .ot-employee-item{width:100%;display:flex;align-items:center;gap:9px;padding:9px 8px;border:0;border-radius:8px;background:transparent;text-align:left;cursor:pointer;color:#34445d}
+  .ot-employee-item:hover{background:#f4f7fc}.ot-employee-item.active{background:#eaf2ff;color:#1858b5}
+  .ot-employee-avatar{width:31px;height:31px;flex:0 0 31px;display:grid;place-items:center;border-radius:50%;background:#e7effb;color:#2862b8;font-size:10px;font-weight:800}
+  .ot-employee-item strong{display:block;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ot-employee-item small{display:block;font-size:9px;color:#8592a5;margin-top:2px}
+  .ot-employee-detail{border:1px solid #e7edf5;border-radius:10px;padding:13px;min-width:0;background:#fbfcfe}
+  .ot-selected-name{font-size:14px;font-weight:800;color:#263a59}.ot-selected-role{font-size:10px;color:#8491a5;margin-top:3px}
+  .ot-selected-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:13px 0}
+  .ot-selected-stat{padding:9px;border:1px solid #e7edf5;border-radius:8px;background:#fff}.ot-selected-stat span{display:block;color:#8290a4;font-size:9px}.ot-selected-stat strong{display:block;font-size:17px;color:#263a59;margin-top:3px}
+  .ot-recent-title{font-size:10px;font-weight:800;color:#62718a;margin:9px 0 6px}.ot-recent-row{display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-top:1px solid #edf1f6;font-size:10px;color:#52627a}.ot-recent-row strong{color:#263a59;white-space:nowrap}
+  .ot-manager-head{align-items:center}.ot-tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .ot-search{height:40px;min-width:240px;display:flex;align-items:center;gap:8px;padding:0 11px;border:1px solid #d4dfed;border-radius:8px;background:#fff;color:#64748b}
+  .ot-search span{font-size:20px}.ot-search input{border:0;outline:0;width:100%;font:inherit;font-size:12px;color:var(--ink);background:transparent}
+  .ot-period-label{height:40px;display:flex;align-items:center;gap:8px;padding:0 11px;border:1px solid #d4dfed;border-radius:8px;background:#fff;color:#334155;font-size:11px;white-space:nowrap}
+  .ot-table-wrap{overflow-x:auto;border:1px solid #e1e9f3;border-radius:9px}.ot-table{min-width:720px}.ot-table th{background:#f2f6fc;color:#52627a;padding:11px 13px;font-size:10px;letter-spacing:.3px}.ot-table td{padding:11px 13px;font-size:12px;border-bottom:1px solid #edf1f6}.ot-table tr:hover td{background:#f8fbff}
+  .ot-kind{display:inline-flex;align-items:center;padding:4px 9px;border-radius:20px;font-size:10px;font-weight:700;background:#e8f1ff;color:#245eb8;border:1px solid #d4e4ff}.ot-kind.holiday{background:#fff4e3;color:#ad7012;border-color:#ffe2b0}
+  .ot-action{padding:6px 10px;border-radius:7px;font-size:10px;font-weight:700;border:1px solid #d4e4ff;background:#edf4ff;color:#245eb8;margin-right:4px;cursor:pointer}.ot-action.delete{border-color:#f5d0ce;background:#fff;color:#c0392b}.ot-empty{text-align:center;padding:25px;color:#8793a5;font-size:12px}
+  @media(max-width:950px){.ot-workspace{grid-template-columns:1fr}.ot-employee-layout{grid-template-columns: minmax(150px,.65fr) minmax(0,1.35fr)}}
+  @media(max-width:650px){.ot-summary-grid{grid-template-columns:1fr}.ot-page-head{flex-direction:column}.ot-form-grid{grid-template-columns:1fr;gap:0}.ot-employee-layout{grid-template-columns:1fr}.ot-employee-list{max-height:170px}.ot-manager-head{align-items:stretch;flex-direction:column}.ot-tools{width:100%}.ot-search{min-width:0;flex:1}.ot-entry-card,.ot-manager-card,.ot-employee-card{padding:15px}}
+
+  .ot-entry-card,.ot-manager-card{padding:22px;margin-bottom:20px;border-radius:14px;border-color:#d5e2f7;box-shadow:0 4px 14px rgba(28,65,120,.07)}
+  .ot-section-heading,.ot-manager-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:18px}
+  .ot-section-heading .section-sub,.ot-manager-head .section-sub{margin-bottom:0}
+  .ot-heading-icon{width:48px;height:48px;display:grid;place-items:center;border-radius:14px;background:#e8f0ff;color:#1458c5;font-size:27px;font-weight:700;flex:0 0 auto}
+  .ot-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 22px;align-items:end}
+  .ot-form-grid .field{margin-bottom:14px}.ot-form-grid .field label{font-size:13px;color:#475467}
+  .ot-form-grid .field input,.ot-form-grid .field select{height:48px;border-radius:9px;padding:10px 14px;font-size:15px;border-color:#cbdaf1}
+  .ot-submit-field .btn{height:48px;width:100%;justify-content:center;border-radius:9px;font-size:15px}
+  .ot-info{margin-top:12px;padding:13px 16px;border-radius:9px;background:#edf5ff;color:#24466f;border:1px solid #d7e7ff;line-height:1.7}
+  .ot-manager-head{align-items:center}.ot-tools{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .ot-search{height:44px;min-width:270px;display:flex;align-items:center;gap:9px;padding:0 13px;border:1px solid #cbdaf1;border-radius:9px;background:#fff;color:#64748b}
+  .ot-search span{font-size:22px}.ot-search input{border:0;outline:0;width:100%;font:inherit;color:var(--ink);background:transparent}
+  .ot-period-label{height:44px;display:flex;align-items:center;gap:9px;padding:0 14px;border:1px solid #cbdaf1;border-radius:9px;background:#fff;color:#334155;white-space:nowrap}
+  .ot-table-wrap{overflow-x:auto;border:1px solid #d5e2f7;border-radius:10px}.ot-table{min-width:760px}.ot-table th{background:#e5efff;color:#334155;padding:12px 14px}.ot-table td{padding:12px 14px;font-size:13px}.ot-table tr:hover td{background:#f8fbff}
+  .ot-kind{display:inline-flex;align-items:center;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:700;background:#e3edff;color:#1458c5;border:1px solid #c8dcff}
+  .ot-kind.holiday{background:#fff1d9;color:#b96800;border-color:#ffdf9b}
+  .ot-action{padding:6px 12px;border-radius:8px;font-weight:700;border:1px solid #c8dcff;background:#eaf2ff;color:#1458c5;margin-right:5px}
+  .ot-action.delete{border-color:#ffc7c2;background:#fff;color:#c0392b}.ot-empty{text-align:center;padding:26px;color:#718096}
+  @media(max-width:760px){.ot-form-grid{grid-template-columns:1fr;gap:0}.ot-manager-head{align-items:stretch;flex-direction:column}.ot-tools{width:100%}.ot-search{min-width:0;flex:1}.ot-period-label{font-size:12px}.ot-entry-card,.ot-manager-card{padding:16px}}
+
+
+/* Professional confirmation dialog */
+.confirm-modal-backdrop{position:fixed;inset:0;z-index:1000002;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(15,23,42,.52);backdrop-filter:blur(4px)}
+.confirm-modal-backdrop.open{display:flex}
+.confirm-modal{width:min(100%,420px);background:#fff;border:1px solid #e5eaf2;border-radius:17px;box-shadow:0 28px 80px rgba(15,23,42,.30);overflow:hidden;animation:confirmModalIn .18s ease-out}
+@keyframes confirmModalIn{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
+.confirm-modal-head{display:flex;align-items:flex-start;gap:13px;padding:23px 23px 12px}
+.confirm-modal-icon{width:46px;height:46px;flex:0 0 46px;display:grid;place-items:center;border-radius:14px;background:#fff1f0;color:#d92d20;font-size:22px}
+.confirm-modal-title{margin:1px 0 4px;color:#172b4d;font-size:17px;font-weight:800}
+.confirm-modal-subtitle{color:#8792a5;font-size:11px}
+.confirm-modal-message{padding:7px 23px 22px;color:#536176;font-size:13px;line-height:1.65}
+.confirm-modal-foot{display:flex;justify-content:flex-end;gap:9px;padding:14px 23px 20px;border-top:1px solid #edf0f5}
+.confirm-modal-foot button{min-width:104px;justify-content:center;border-radius:9px;padding:9px 14px;font-weight:700;cursor:pointer}
+.confirm-modal-cancel{background:#fff;border:1px solid #d8e0eb;color:#475467}
+.confirm-modal-cancel:hover{background:#f8fafc}
+.confirm-modal-accept{background:#d92d20;border:1px solid #d92d20;color:#fff}
+.confirm-modal-accept:hover{background:#b42318}
+.confirm-modal-accept:focus-visible,.confirm-modal-cancel:focus-visible{outline:3px solid #b8d2ff;outline-offset:2px}
+@media(max-width:480px){.confirm-modal-foot{flex-direction:column-reverse}.confirm-modal-foot button{width:100%}}
 </style>
 </head>
 <body>
@@ -702,53 +784,39 @@ backdrop-filter:blur(2px);
 
   <!-- PANEL LEMBUR -->
   <section class="panel" id="panel-lembur">
-<div class="card card-pad">
-<h2 class="section-title">
-Input Lembur
-</h2>
-<p class="section-sub">
-Input lembur berdasarkan tanggal.
-Sistem otomatis menentukan apakah lembur hari biasa atau hari libur.
-</p>
-<div class="grid-2">
-<div class="field">
-<label>Nama Karyawan</label>
-<select id="otEmp"></select>
-</div>
-<div class="field">
-<label>Tanggal</label>
-<input type="date" id="otDate">
-</div>
-<div class="field">
-<label>Jumlah Jam Lembur</label>
-<input
-type="number"
-id="otHour"
-min="0"
-step="0.5"
-placeholder="Contoh : 4">
-</div>
-<div class="field">
-<label>&nbsp;</label>
-<button
-class="btn btn-primary"
-id="btnSaveOT"
-style="width:100%;height:42px">
-💾 Input Lembur
-</button>
-</div>
-</div>
-<div
-id="otInfo"
-style="
-margin-top:20px;
-padding:12px;
-background:#eef6ff;
-border-radius:8px;
-display:none;">
-</div>
-</div>
-</section>
+    <div class="ot-page-head"><div><h2>Manajemen Lembur</h2><p>Kelola input lembur, pantau total jam, dan periksa riwayat lembur karyawan.</p></div><div class="ot-page-period">▣ <span id="otPagePeriod">-</span></div></div>
+    <div class="ot-summary-grid">
+      <div class="ot-summary"><div class="ot-summary-icon">◷</div><div><span>Total Jam Lembur</span><strong id="otTotalHours">0 jam</strong></div></div>
+      <div class="ot-summary"><div class="ot-summary-icon">✓</div><div><span>Jam Hari Kerja</span><strong id="otWorkHours">0 jam</strong></div></div>
+      <div class="ot-summary"><div class="ot-summary-icon">★</div><div><span>Jam Hari Libur</span><strong id="otHolidayHours">0 jam</strong></div></div>
+    </div>
+    <div class="ot-workspace">
+      <div class="ot-entry-card">
+        <div class="ot-section-heading"><div><h2 class="section-title">Input Lembur</h2><p class="section-sub">Tambahkan jam lembur karyawan. Jenis hari ditentukan otomatis dari tanggal.</p></div><span class="ot-heading-icon">＋</span></div>
+        <div class="ot-form-grid">
+          <div class="field"><label for="otEmp">Nama Karyawan</label><select id="otEmp"></select></div>
+          <div class="field"><label for="otDate">Tanggal</label><input type="date" id="otDate"></div>
+          <div class="field"><label for="otHour">Jumlah Jam Lembur</label><input type="number" id="otHour" min="0" step="0.5" placeholder="Contoh: 4"></div>
+          <div class="field ot-submit-field"><label>&nbsp;</label><button class="btn btn-primary" id="btnSaveOT">💾 <span id="otSaveLabel">Simpan Lembur</span></button></div>
+        </div>
+        <div id="otInfo" class="ot-info" style="display:none"></div>
+      </div>
+      <div class="ot-employee-card">
+        <div class="ot-employee-head"><h3>Ringkasan Karyawan</h3><small id="otEmployeeCount">0 karyawan</small></div>
+        <div class="ot-employee-layout">
+          <div class="ot-employee-list" id="otEmployeeList"></div>
+          <div class="ot-employee-detail" id="otEmployeeDetail"><div class="ot-selected-name">Pilih karyawan</div><div class="ot-selected-role">Ringkasan lembur akan ditampilkan di sini.</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="ot-manager-card">
+      <div class="ot-manager-head"><div><h2 class="section-title">Riwayat Data Lembur</h2><p class="section-sub">Cari, edit, atau hapus catatan lembur pada periode aktif.</p></div>
+        <div class="ot-tools"><label class="ot-search"><span>⌕</span><input id="otSearch" type="search" placeholder="Cari nama karyawan..."></label><div class="ot-period-label">▣ <strong id="otPeriodLabel">-</strong></div></div>
+      </div>
+      <div class="ot-table-wrap"><table class="tbl ot-table"><thead><tr><th>NO</th><th>NAMA KARYAWAN</th><th>TANGGAL</th><th>JENIS LEMBUR</th><th>JUMLAH JAM</th><th>AKSI</th></tr></thead><tbody id="otDataBody"></tbody></table></div>
+      <div id="otEmpty" class="ot-empty" style="display:none">Belum ada data lembur pada periode ini.</div>
+    </div>
+  </section>
 
 <section class="panel" id="panel-titipan">
 
@@ -1144,6 +1212,20 @@ Belum ada titipan.
 
 <div class="toast" id="toast"></div>
 
+<div class="confirm-modal-backdrop" id="confirmModalBackdrop" aria-hidden="true">
+  <section class="confirm-modal" role="alertdialog" aria-modal="true" aria-labelledby="confirmModalTitle" aria-describedby="confirmModalMessage">
+    <div class="confirm-modal-head">
+      <div class="confirm-modal-icon" id="confirmModalIcon">⚠</div>
+      <div><h3 class="confirm-modal-title" id="confirmModalTitle">Konfirmasi tindakan</h3><div class="confirm-modal-subtitle">MASTER BUS PAYROLL · KONFIRMASI</div></div>
+    </div>
+    <div class="confirm-modal-message" id="confirmModalMessage">Apakah Anda yakin ingin melanjutkan?</div>
+    <div class="confirm-modal-foot">
+      <button type="button" class="confirm-modal-cancel" id="confirmModalCancel">Batal</button>
+      <button type="button" class="confirm-modal-accept" id="confirmModalAccept">Ya, lanjutkan</button>
+    </div>
+  </section>
+</div>
+
 <div class="logout-modal-backdrop" id="logoutModalBackdrop" role="dialog" aria-modal="true" aria-labelledby="logoutModalTitle">
   <div class="logout-modal">
     <div class="logout-modal-head">
@@ -1403,6 +1485,78 @@ function hideLoading(){
     document.getElementById("loadingOverlay").style.display="none";
 
 }
+
+/* ============================= NAV / TABS ============================= */
+const selMonth = document.getElementById('selMonth');
+const selYear = document.getElementById('selYear');
+if(selMonth && selMonth.options.length === 0){
+  BULAN_ID.forEach((nama,i)=>{
+    const option=document.createElement('option');
+    option.value=i+1; option.textContent=nama; selMonth.appendChild(option);
+  });
+}
+if(selYear && selYear.options.length === 0){
+  for(let y=2024;y<=2028;y++){
+    const option=document.createElement('option');
+    option.value=y; option.textContent=y; selYear.appendChild(option);
+  }
+}
+if(selMonth) selMonth.value=state.month;
+if(selYear) selYear.value=state.year;
+
+if(selMonth) selMonth.addEventListener('change',async()=>{
+  state.month=Number(selMonth.value);
+  await loadAttendance(state.year,state.month);
+  await renderActiveTab();
+});
+if(selYear) selYear.addEventListener('change',async()=>{
+  state.year=Number(selYear.value);
+  await loadAttendance(state.year,state.month);
+  await renderActiveTab();
+});
+
+document.querySelectorAll('nav.tabs button[data-tab]').forEach(btn=>{
+  btn.addEventListener('click',async()=>{
+    if(isSaving){
+      showLoading();
+      try{ await savePromise; } finally { hideLoading(); }
+    }
+    if(typeof canAccessTab==='function' && activeProfile && !canAccessTab(btn.dataset.tab)) return;
+    state.tab=btn.dataset.tab;
+    document.querySelectorAll('nav.tabs button[data-tab]').forEach(b=>b.classList.toggle('active',b===btn));
+    document.querySelectorAll('.panel[id^="panel-"]').forEach(panel=>panel.classList.toggle('active',panel.id==='panel-'+state.tab));
+    await renderActiveTab();
+  });
+});
+
+async function renderActiveTab(){
+  if(state.tab==='karyawan'){
+    renderKaryawan();
+  }else if(state.tab==='absensi'){
+    await loadAttendance(state.year,state.month);
+    renderAbsensi();
+  }else if(state.tab==='lembur'){
+    await loadAttendance(state.year,state.month);
+    populateOvertimeEmployee();
+    renderOvertimeManager();
+  }else if(state.tab==='titipan'){
+    renderAdjustments();
+  }else if(state.tab==='slipBulanan'){
+    await loadAttendance(state.year,state.month); renderSlipBulanan();
+  }else if(state.tab==='slipUM'){
+    await loadAttendance(state.year,state.month); renderSlipUM();
+  }else if(state.tab==='rekapUM'){
+    await loadAttendance(state.year,state.month); renderRekapUM();
+  }else if(state.tab==='rekap'){
+    await loadAttendance(state.year,state.month); renderRekap();
+  }else if(state.tab==='laporanBulanan'){
+    await loadAttendance(state.year,state.month); renderLaporanBulanan();
+  }else if(state.tab==='readme'){
+    renderReadme();
+  }else if(state.tab==='cuti'){
+    if(typeof renderCuti==='function') renderCuti();
+  }
+}
 async function saveCurrentTab(){
 
     if(state.tab==="karyawan"){
@@ -1531,295 +1685,139 @@ function isHoliday(date){
     const key=date.toISOString().slice(0,10);
     return holidays.includes(key);
 }
-async function saveOvertime(){
+let editingOvertime = null;
 
-    if(isSaving) return;
-
-    isSaving = true;
-
-    showLoading();
-
-    try{
-
-        const empId=document.getElementById("otEmp").value;
-        const date=document.getElementById("otDate").value;
-        const jam=Number(document.getElementById("otHour").value);
-
-        if(!empId){
-            alert("Pilih karyawan.");
-            return;
-        }
-
-        if(!date){
-            alert("Pilih tanggal.");
-            return;
-        }
-
-        if(jam<=0){
-            alert("Masukkan jumlah jam.");
-            return;
-        }
-
-        const dt=new Date(date);
-
-        const year=dt.getFullYear();
-
-        const month=dt.getMonth()+1;
-
-        const day=dt.getDate();
-
-        const mk=monthKey(year,month);
-
-        if(!attendance[mk])
-            attendance[mk]={};
-
-        if(!attendance[mk][empId])
-            attendance[mk][empId]={};
-
-        if(!attendance[mk][empId][day])
-            attendance[mk][empId][day]={
-                kode:"",
-                lb:0,
-                lm:0
-            };
-
-        const rec=attendance[mk][empId][day];
-
-        if(isHoliday(dt)){
-
-            rec.lm=(Number(rec.lm)||0)+jam;
-
-        }else{
-
-            rec.lb=(Number(rec.lb)||0)+jam;
-
-        }
-
-        attendance[mk][empId][day]=rec;
-
-        await saveAttendanceData(
-            mk,
-            attendance[mk]
-        );
-
-        await loadAttendance(year,month);
-
-        renderAbsensi();
-
-        renderSlipUM();
-
-        renderRekapUM();
-
-        renderRekap();
-
-        document.getElementById("otInfo").style.display="block";
-
-        document.getElementById("otInfo").innerHTML=`
-            ✅ <strong>Lembur berhasil disimpan.</strong><br><br>
-
-            Tanggal :
-            ${date}<br>
-
-            Jenis :
-            ${isHoliday(dt)?"Hari Libur / Tanggal Merah":"Hari Kerja"}<br>
-
-            Jam :
-            <strong>${jam}</strong>
-        `;
-
-        showToast("Lembur berhasil disimpan.");
-
-    }
-
-    catch(err){
-
-        console.error(err);
-
-        alert("Gagal menyimpan data ke Firebase.");
-
-    }
-
-    finally{
-
-        hideLoading();
-
-        isSaving=false;
-
-    }
-
+function formatOTDate(dateKey){
+  const [y,m,d]=String(dateKey).split('-');
+  return `${d}/${m}/${y}`;
 }
-function calcMonthly(emp,y,m){
-  const dim = daysInMonth(y,m);
-  const c = calcRange(emp,y,m,1,dim);
-  // Slip bulanan TIDAK memasukkan UM maupun lembur karena dibayarkan mingguan
-// ==============================
-// TITIPAN POTONGAN
-// ==============================
-const adj = adjustments.filter(a =>
-    a.empId === emp.id &&
-    a.payrollKey === monthKey(y,m)
-);
-// ==============================
-// TITIPAN ALPHA
-// ==============================
-const potTitipanAlpha = adj.reduce((total, a) => {
-    const type = a.type || "alpha";
-    if(type === "alpha"){
-        return total + dailyRate(emp);
-    }
-    return total;
-}, 0);
-// ==============================
-// TITIPAN TERLAMBAT
-// ==============================
-const potTitipanTerlambat = adj.reduce((total, a) => {
-    const type = a.type || "alpha";
-    if(type === "terlambat"){
-        return total +
-            (Number(emp.potTerlambatRate) || 0);
-    }
-    return total;
-}, 0);
-// ==============================
-// TOTAL TITIPAN
-// ==============================
-const potTitipan =
-    potTitipanAlpha +
-    potTitipanTerlambat;
-  const total =
-    emp.gajiPokok
-    - emp.bpjs
-    - c.potTidakMasuk
-    - c.potTerlambat
-    - c.potSetengahHari
-    - potTitipan;
-  return Object.assign(
-    {
-        total,
-        potTitipan,
-        potTitipanAlpha,
-        potTitipanTerlambat
-    },
-    c
-);
-}
-function showToast(msg){
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  clearTimeout(t._timer);
-  t._timer = setTimeout(()=>t.classList.remove('show'), 2200);
-}
-function showToast(msg){
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(t._timer);
-  t._timer = setTimeout(()=>t.classList.remove('show'), 2200);
-}
-
-// =============================
-// LOADING SCREEN
-// =============================
-
-function showLoading(){
-
-    document.getElementById("loadingOverlay").style.display = "flex";
-
-}
-
-function hideLoading(){
-
-    document.getElementById("loadingOverlay").style.display = "none";
-
-}
-/* ============================= NAV / TABS ============================= */
-document.querySelectorAll('nav.tabs button').forEach(btn=>{
-
-    btn.addEventListener('click',async()=>{
-
-    if(isSaving){
-
-        showLoading();
-
-        await savePromise;
-
-        hideLoading();
-
-    }
-
-    if(!canAccessTab(btn.dataset.tab)) return;
-
-    state.tab = btn.dataset.tab;
-
-    document
-    .querySelectorAll("nav.tabs button")
-    .forEach(b=>b.classList.toggle("active",b===btn));
-
-    document
-    .querySelectorAll(".panel")
-    .forEach(p=>p.classList.remove("active"));
-
-    document
-    .getElementById("panel-"+state.tab)
-    .classList.add("active");
-
-    await renderActiveTab();
-
+function getOvertimeRows(){
+  const mk=monthKey(state.year,state.month);
+  const monthData=attendance[mk]||{};
+  const rows=[];
+  Object.entries(monthData).forEach(([empId,days])=>{
+    const emp=employees.find(e=>String(e.id)===String(empId));
+    if(!emp) return;
+    Object.entries(days||{}).forEach(([day,rec])=>{
+      const lb=Number(rec?.lb)||0, lm=Number(rec?.lm)||0;
+      if(lb>0) rows.push({empId,emp,day:Number(day),date:`${state.year}-${String(state.month).padStart(2,'0')}-${String(day).padStart(2,'0')}`,hours:lb,holiday:false});
+      if(lm>0) rows.push({empId,emp,day:Number(day),date:`${state.year}-${String(state.month).padStart(2,'0')}-${String(day).padStart(2,'0')}`,hours:lm,holiday:true});
+    });
   });
-});
-const selMonth = document.getElementById('selMonth');
-const selYear = document.getElementById('selYear');
-BULAN_ID.forEach((b,i)=>{
-  const o=document.createElement('option'); o.value=i+1; o.textContent=b; selMonth.appendChild(o);
-});
-for(let y=2024;y<=2028;y++){
-  const o=document.createElement('option'); o.value=y; o.textContent=y; selYear.appendChild(o);
+  return rows.sort((a,b)=>b.date.localeCompare(a.date)||a.emp.name.localeCompare(b.emp.name));
 }
-selMonth.value = state.month; selYear.value = state.year;
-selMonth.addEventListener('change', async ()=>{ state.month=+selMonth.value; await loadAttendance(state.year,state.month); renderActiveTab(); });
-selYear.addEventListener('change', async ()=>{ state.year=+selYear.value; await loadAttendance(state.year,state.month); renderActiveTab(); });
+let selectedOTEmployee = null;
+function renderOvertimeManager(){
+  const body=document.getElementById('otDataBody'); if(!body) return;
+  const allRows=getOvertimeRows();
+  const q=(document.getElementById('otSearch')?.value||'').trim().toLowerCase();
+  const rows=allRows.filter(r=>r.emp.name.toLowerCase().includes(q)||(r.emp.bagian||'').toLowerCase().includes(q));
+  const period=new Date(state.year,state.month-1,1).toLocaleDateString('id-ID',{month:'long',year:'numeric'});
+  document.getElementById('otPeriodLabel').textContent=period;
+  document.getElementById('otPagePeriod').textContent=period;
+  const total=allRows.reduce((a,r)=>a+r.hours,0), work=allRows.filter(r=>!r.holiday).reduce((a,r)=>a+r.hours,0), holiday=allRows.filter(r=>r.holiday).reduce((a,r)=>a+r.hours,0);
+  document.getElementById('otTotalHours').textContent=total+' jam';
+  document.getElementById('otWorkHours').textContent=work+' jam';
+  document.getElementById('otHolidayHours').textContent=holiday+' jam';
+  document.getElementById('otEmpty').style.display=rows.length?'none':'block';
+  body.innerHTML=rows.map((r,i)=>`<tr><td>${i+1}</td><td><strong>${r.emp.name}</strong><div style="font-size:10px;color:#8793a5">${r.emp.bagian||'-'}</div></td><td>${formatOTDate(r.date)}</td><td><span class="ot-kind ${r.holiday?'holiday':''}">${r.holiday?'Hari Libur':'Hari Kerja'}</span></td><td><strong>${r.hours} jam</strong></td><td><button class="ot-action" data-ot-edit="${r.empId}|${r.date}|${r.holiday?'lm':'lb'}|${r.hours}">✎ Edit</button><button class="ot-action delete" data-ot-delete="${r.empId}|${r.date}|${r.holiday?'lm':'lb'}">Hapus</button></td></tr>`).join('');
+  const activeEmployees=employees.filter(e=>allRows.some(r=>String(r.empId)===String(e.id)));
+  if(!selectedOTEmployee || !activeEmployees.some(e=>String(e.id)===String(selectedOTEmployee))) selectedOTEmployee=activeEmployees[0]?.id||employees[0]?.id||null;
+  document.getElementById('otEmployeeCount').textContent=activeEmployees.length+' karyawan';
+  document.getElementById('otEmployeeList').innerHTML=activeEmployees.length?activeEmployees.map(e=>`<button type="button" class="ot-employee-item ${String(e.id)===String(selectedOTEmployee)?'active':''}" data-ot-employee="${e.id}"><span class="ot-employee-avatar">${String(e.name||'?').split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase()}</span><span><strong>${e.name}</strong><small>${e.bagian||'Karyawan'}</small></span></button>`).join(''):'<div class="ot-empty">Belum ada data karyawan.</div>';
+  const emp=employees.find(e=>String(e.id)===String(selectedOTEmployee));
+  const erows=allRows.filter(r=>String(r.empId)===String(selectedOTEmployee));
+  const eh=erows.reduce((a,r)=>a+r.hours,0), ew=erows.filter(r=>!r.holiday).reduce((a,r)=>a+r.hours,0), el=erows.filter(r=>r.holiday).reduce((a,r)=>a+r.hours,0);
+  document.getElementById('otEmployeeDetail').innerHTML=emp?`<div class="ot-selected-name">${emp.name}</div><div class="ot-selected-role">${emp.bagian||'Karyawan'}</div><div class="ot-selected-stats"><div class="ot-selected-stat"><span>Total Jam</span><strong>${eh} jam</strong></div><div class="ot-selected-stat"><span>Hari Kerja</span><strong>${ew} jam</strong></div><div class="ot-selected-stat"><span>Hari Libur</span><strong>${el} jam</strong></div><div class="ot-selected-stat"><span>Catatan</span><strong>${erows.length}</strong></div></div><div class="ot-recent-title">RIWAYAT TERBARU</div>${erows.slice(0,4).map(r=>`<div class="ot-recent-row"><span>${formatOTDate(r.date)} · ${r.holiday?'Libur':'Kerja'}</span><strong>${r.hours} jam</strong></div>`).join('')||'<div class="ot-recent-row">Belum ada riwayat lembur</div>'}`:'<div class="ot-selected-name">Belum ada karyawan</div>';
+}
 
-async function renderActiveTab(){
-    if(state.tab==='karyawan'){
-        renderKaryawan();
-    }
-    else if(state.tab==='absensi'){
-        await loadAttendance(state.year,state.month);
-        renderAbsensi();
-    }
-    else if(state.tab==='lembur'){
-        populateOvertimeEmployee();
-    }
-    else if(state.tab==="titipan"){
-        renderAdjustments();
-    }
-    else if(state.tab==="cuti"){
-        renderCuti();
-    }
-    else if(state.tab==='slipBulanan'){
-        await loadAttendance(state.year,state.month);
-        renderSlipBulanan();
-    }
-    else if(state.tab==='slipUM'){
-        await loadAttendance(state.year,state.month);
-        renderSlipUM();
-    }
-    else if(state.tab==='rekapUM'){
-        await loadAttendance(state.year,state.month);
-        renderRekapUM();
-    }
-    else if(state.tab==='rekap'){
-    await loadAttendance(state.year,state.month);
-    renderRekap();
-    }
-    else if(state.tab==='laporanBulanan'){
-        await loadAttendance(state.year,state.month);
-        renderLaporanBulanan();
-    }
-    else if(state.tab==='readme'){
-        renderReadme();
-    }
+function resetOvertimeForm(){
+  editingOvertime=null;
+  document.getElementById('otHour').value='';
+  document.getElementById('otSaveLabel').textContent='Input Lembur';
+  document.getElementById('btnSaveOT').innerHTML='💾 <span id="otSaveLabel">Input Lembur</span>';
 }
+async function saveOvertime(){
+  if(isSaving) return;
+  const empId=document.getElementById('otEmp').value;
+  const date=document.getElementById('otDate').value;
+  const jam=Number(document.getElementById('otHour').value);
+  if(!empId){alert('Pilih karyawan.');return;}
+  if(!date){alert('Pilih tanggal.');return;}
+  if(!Number.isFinite(jam)||jam<=0){alert('Masukkan jumlah jam yang valid.');return;}
+  isSaving=true; showLoading();
+  try{
+    const [year,month,day]=date.split('-').map(Number);
+    const mk=monthKey(year,month);
+    if(!attendance[mk]) attendance[mk]={};
+    if(!attendance[mk][empId]) attendance[mk][empId]={};
+    if(!attendance[mk][empId][day]) attendance[mk][empId][day]={kode:'',lb:0,lm:0};
+    const rec=attendance[mk][empId][day];
+    const dt=new Date(year,month-1,day);
+    const field=editingOvertime?editingOvertime.field:(isHoliday(dt)?'lm':'lb');
+    if(editingOvertime){
+      const old=attendance[monthKey(editingOvertime.year,editingOvertime.month)]?.[editingOvertime.empId]?.[editingOvertime.day];
+      if(old) old[editingOvertime.field]=0;
+      rec[field]=(Number(rec[field])||0)+jam;
+    }else rec[field]=(Number(rec[field])||0)+jam;
+    await saveAttendanceData(mk,attendance[mk]);
+    await loadAttendance(state.year,state.month);
+    renderAbsensi(); renderSlipUM(); renderRekapUM(); renderRekap();
+    document.getElementById('otInfo').style.display='block';
+    document.getElementById('otInfo').innerHTML=`✅ <strong>Lembur berhasil ${editingOvertime?'diperbarui':'disimpan'}.</strong><br>Tanggal: ${formatOTDate(date)}<br>Jenis: ${field==='lm'?'Hari Libur / Tanggal Merah':'Hari Kerja'}<br>Jam: <strong>${jam}</strong>`;
+    resetOvertimeForm(); renderOvertimeManager(); showToast('Lembur berhasil disimpan.');
+  }catch(err){console.error(err);alert('Gagal menyimpan data ke Firebase.');}
+  finally{hideLoading();isSaving=false;}
+}
+async function editOvertimeRecord(empId,date,field,hours){
+  const [year,month,day]=date.split('-').map(Number);
+  await loadAttendance(year,month);
+  const emp=document.getElementById('otEmp'); emp.value=empId;
+  document.getElementById('otDate').value=date;
+  document.getElementById('otHour').value=hours;
+  editingOvertime={empId,date,field,year,month,day};
+  document.getElementById('otSaveLabel').textContent='Simpan Perubahan';
+  document.getElementById('btnSaveOT').innerHTML='💾 <span id="otSaveLabel">Simpan Perubahan</span>';
+  document.getElementById('otHour').focus();
+  document.querySelector('.ot-entry-card').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function showConfirmModal({title='Konfirmasi tindakan',message='Apakah Anda yakin ingin melanjutkan?',confirmText='Ya, lanjutkan',danger=true,icon='⚠'}={}){
+  const backdrop=document.getElementById('confirmModalBackdrop');
+  const titleEl=document.getElementById('confirmModalTitle');
+  const messageEl=document.getElementById('confirmModalMessage');
+  const accept=document.getElementById('confirmModalAccept');
+  const cancel=document.getElementById('confirmModalCancel');
+  const iconEl=document.getElementById('confirmModalIcon');
+  titleEl.textContent=title; messageEl.textContent=message;
+  accept.textContent=confirmText; iconEl.textContent=icon;
+  accept.style.background=danger?'#d92d20':'#175cd3';
+  accept.style.borderColor=danger?'#d92d20':'#175cd3';
+  backdrop.classList.add('open'); backdrop.setAttribute('aria-hidden','false');
+  return new Promise(resolve=>{
+    let settled=false;
+    const finish=value=>{if(settled)return;settled=true;backdrop.classList.remove('open');backdrop.setAttribute('aria-hidden','true');accept.removeEventListener('click',onAccept);cancel.removeEventListener('click',onCancel);backdrop.removeEventListener('click',onBackdrop);document.removeEventListener('keydown',onKey);resolve(value);};
+    const onAccept=()=>finish(true),onCancel=()=>finish(false);
+    const onBackdrop=e=>{if(e.target===backdrop)finish(false);};
+    const onKey=e=>{if(e.key==='Escape')finish(false);if(e.key==='Enter'&&backdrop.classList.contains('open'))finish(true);};
+    accept.addEventListener('click',onAccept);cancel.addEventListener('click',onCancel);backdrop.addEventListener('click',onBackdrop);document.addEventListener('keydown',onKey);
+    cancel.focus();
+  });
+}
+
+async function deleteOvertimeRecord(empId,date,field){
+  if(!await showConfirmModal({title:'Hapus catatan lembur?',message:'Catatan lembur yang dipilih akan dihapus dari periode ini. Tindakan ini tidak dapat dibatalkan.',confirmText:'Ya, hapus',icon:'🗑'})) return;
+  const [year,month,day]=date.split('-').map(Number), mk=monthKey(year,month);
+  try{
+    if(!attendance[mk]) await loadAttendance(year,month);
+    const rec=attendance[mk]?.[empId]?.[day]; if(!rec) return;
+    rec[field]=0;
+    await saveAttendanceData(mk,attendance[mk]);
+    await loadAttendance(state.year,state.month);
+    renderAbsensi(); renderSlipUM(); renderRekapUM(); renderRekap(); renderOvertimeManager();
+    showToast('Data lembur berhasil dihapus.');
+  }catch(err){console.error(err);alert('Gagal menghapus data lembur.');}
+}
+
 function populateOvertimeEmployee(){
 
     const ot=document.getElementById("otEmp");
@@ -1829,15 +1827,9 @@ function populateOvertimeEmployee(){
     ot.innerHTML="";
 
     employees.forEach(emp=>{
-
-        ot.innerHTML += `
-            <option value="${emp.id}">
-                ${emp.name} — ${emp.bagian}
-            </option>
-        `;
-
+        ot.innerHTML += `<option value="${emp.id}">${emp.name} — ${emp.bagian}</option>`;
     });
-
+    renderOvertimeManager();
 }
 
 /* ============================= KARYAWAN TAB ============================= */
@@ -1922,7 +1914,8 @@ document.getElementById('empModalSave').addEventListener('click', async ()=>{
 });
 async function deleteEmp(id){
   const emp = employees.find(e=>e.id===id);
-  if(!confirm('Hapus karyawan "'+emp.name+'"? Data absensi terkait tidak akan otomatis terhapus.')) return;
+  if(!emp) return;
+  if(!await showConfirmModal({title:'Hapus data karyawan?',message:'Data '+emp.name+' akan dihapus dari daftar karyawan. Data absensi terkait tidak akan otomatis terhapus.',confirmText:'Ya, hapus',icon:'🗑'})) return;
   employees = employees.filter(e=>e.id!==id);
   await saveEmployees(employees);
   renderKaryawan();
@@ -3420,7 +3413,7 @@ async function addAdjustment(){
     }
 }
 async function deleteAdjustment(id){
-    if(!confirm("Hapus titipan ini?")) return;
+    if(!await showConfirmModal({title:'Hapus titipan potongan?',message:'Data titipan yang dipilih akan dihapus. Tindakan ini tidak dapat dibatalkan.',confirmText:'Ya, hapus',icon:'🗑'})) return;
     showLoading("Menghapus Titipan...");
     adjustments = adjustments.filter(a=>a.id!==id);
     await saveAdjustments(adjustments);
@@ -3723,9 +3716,18 @@ function startSessionWatcher(){
 
 }
 const btnOT=document.getElementById("btnSaveOT");
-if(btnOT){
-    btnOT.onclick=saveOvertime;
-}
+if(btnOT){ btnOT.onclick=saveOvertime; }
+const otSearch=document.getElementById('otSearch');
+if(otSearch) otSearch.addEventListener('input',renderOvertimeManager);
+const otEmployeeList=document.getElementById('otEmployeeList');
+if(otEmployeeList) otEmployeeList.addEventListener('click',e=>{const item=e.target.closest('[data-ot-employee]');if(item){selectedOTEmployee=item.dataset.otEmployee;renderOvertimeManager();}});
+const otBody=document.getElementById('otDataBody');
+if(otBody) otBody.addEventListener('click',e=>{
+  const edit=e.target.closest('[data-ot-edit]');
+  const del=e.target.closest('[data-ot-delete]');
+  if(edit){const [empId,date,field,hours]=edit.dataset.otEdit.split('|');editOvertimeRecord(empId,date,field,Number(hours));}
+  if(del){const [empId,date,field]=del.dataset.otDelete.split('|');deleteOvertimeRecord(empId,date,field);}
+});
 const btnAdj=document.getElementById("btnAddAdjustment");
 
 if(btnAdj){
