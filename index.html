@@ -827,8 +827,7 @@ Titipan Potongan
 </h2>
 
 <p class="section-sub">
-Digunakan apabila potongan Alpha atau Terlambat dari periode sebelumnya
-belum sempat dipotong.
+Digunakan untuk menitipkan potongan Alpha, Terlambat, atau Cuti yang belum diperhitungkan pada periode sebelumnya.
 </p>
 
 <div class="grid-2">
@@ -845,6 +844,10 @@ Alpha
 
 <option value="terlambat">
 Terlambat
+</option>
+
+<option value="cuti">
+Cuti (Potong Uang Makan)
 </option>
 
 </select>
@@ -990,6 +993,7 @@ Belum ada titipan.
         <th>Jumlah Jam Lembur</th>
         <th>Jumlah Jam Lembur Hari Libur</th>
         <th>Uang Makan</th>
+        <th>Pengurang UM (Cuti)</th>
         <th>Lembur</th>
         <th>Lembur Hari Libur</th>
         <th>Total</th>
@@ -1668,6 +1672,22 @@ function calcRange(emp,y,m,start,end){
   const lemburMerahRp = jamLM*lemburMerahRate(emp);
   return {cT,cSH,cA,cSD,cLN,cDL,cCT,cUM,jamLB,jamLM,potTidakMasuk,potTerlambat,potSetengahHari,uangMakan,lemburBiasaRp,lemburMerahRp};
 }
+// Mengalokasikan titipan cuti ke periode UM. Jika tanggal kejadian berada
+// di bulan lain (titipan dari periode sebelumnya), potongan masuk ke UM1.
+function getCutiAdjustmentAmount(emp,y,m,start,end){
+  const key=monthKey(y,m);
+  return adjustments.reduce((sum,a)=>{
+    if(a.type!=='cuti' || String(a.empId)!==String(emp.id) || a.payrollKey!==key) return sum;
+    const raw=String(a.eventDate||'');
+    const parts=raw.split('-').map(Number);
+    const eventYear=parts[0], eventMonth=parts[1], day=parts[2];
+    if(!eventYear || !eventMonth || !day) return sum;
+    const samePayrollMonth=eventYear===Number(y) && eventMonth===Number(m);
+    const belongsToRange=samePayrollMonth ? (day>=start && day<=end) : start===1;
+    return belongsToRange ? sum+(Number(emp.umRate)||0) : sum;
+  },0);
+}
+
 // Perhitungan payroll bulanan dipakai oleh slip dan rekap.
 // Fungsi ini wajib tersedia sebelum renderer rekap dipanggil dari Input Lembur.
 function calcMonthly(emp,y,m){
@@ -1685,6 +1705,11 @@ function calcMonthly(emp,y,m){
     if((a.type||'alpha')==='terlambat') return total + (Number(emp.potTerlambatRate)||0);
     return total;
   },0);
+  // Titipan cuti hanya mengurangi uang makan, bukan gaji pokok.
+  const potTitipanCuti = adj.reduce((total,a)=>{
+    if(a.type==='cuti') return total + (Number(emp.umRate)||0);
+    return total;
+  },0);
   const potTitipan = potTitipanAlpha + potTitipanTerlambat;
   const total = (Number(emp.gajiPokok)||0)
     - (Number(emp.bpjs)||0)
@@ -1692,7 +1717,8 @@ function calcMonthly(emp,y,m){
     - c.potTerlambat
     - c.potSetengahHari
     - potTitipan;
-  return Object.assign({total,potTitipan,potTitipanAlpha,potTitipanTerlambat},c);
+  const uangMakanBersih = Math.max(0, (Number(c.uangMakan)||0) - potTitipanCuti);
+  return Object.assign({},c,{total,potTitipan,potTitipanAlpha,potTitipanTerlambat,potTitipanCuti,uangMakanKotor:c.uangMakan,uangMakan:uangMakanBersih});
 }
 
 // Notifikasi ringan yang digunakan oleh seluruh tab aplikasi.
@@ -2610,10 +2636,9 @@ function renderSlipUM(){
       p.end
   );
 
-  const total =
-      c.uangMakan +
-      c.lemburBiasaRp +
-      c.lemburMerahRp;
+  const cutiUM = getCutiAdjustmentAmount(emp,state.year,state.month,p.start,p.end);
+  c.uangMakan = Math.max(0, Number(c.uangMakan||0)-cutiUM);
+  const total = c.uangMakan + c.lemburBiasaRp + c.lemburMerahRp;
 
   wrap.innerHTML=`
 
@@ -2647,6 +2672,7 @@ Bagian :
 <div class="lbl">Uang Makan</div>
 <div class="val">${rupiah(c.uangMakan)}</div>
 </div>
+${cutiUM>0?`<div class="slip-line"><div class="lbl">Pengurang Uang Makan (Titipan Cuti)</div><div class="val neg">-${rupiah(cutiUM)}</div></div>`:''}
 <hr>
 <div class="slip-line">
 <div class="lbl">Jumlah Jam Lembur</div>
@@ -3170,6 +3196,8 @@ function renderRekapUM(){
   let body='',tu=0,tl=0,tlm=0,tt=0;
   employees.forEach(emp=>{
     const c=calcRange(emp,state.year,state.month,p.start,p.end);
+    const cutiUM=getCutiAdjustmentAmount(emp,state.year,state.month,p.start,p.end);
+    c.uangMakan=Math.max(0,Number(c.uangMakan||0)-cutiUM);
     const total=c.uangMakan+c.lemburBiasaRp+c.lemburMerahRp;
     tu+=c.uangMakan; tl+=c.lemburBiasaRp; tlm+=c.lemburMerahRp; tt+=total;
     body+=`<tr>
@@ -3181,6 +3209,7 @@ function renderRekapUM(){
       <td class="num">${c.jamLB}</td>
       <td class="num">${c.jamLM}</td>
       <td class="num">${rupiah(c.uangMakan)}</td>
+      <td class="num">${rupiah(cutiUM)}</td>
       <td class="num">${rupiah(c.lemburBiasaRp)}</td>
       <td class="num">${rupiah(c.lemburMerahRp)}</td>
       <td class="num"><strong>${rupiah(total)}</strong></td>
@@ -3189,6 +3218,7 @@ function renderRekapUM(){
   body+=`<tr style="font-weight:bold;background:#eef6f3">
   <td colspan="7">TOTAL</td>
   <td class="num">${rupiah(tu)}</td>
+  <td class="num">-</td>
   <td class="num">${rupiah(tl)}</td>
   <td class="num">${rupiah(tlm)}</td>
   <td class="num">${rupiah(tt)}</td>
@@ -3358,11 +3388,11 @@ function renderAdjustments(){
         let pot = 0;
         if(emp){
             if(type === "terlambat"){
-                pot =
-                    Number(emp.potTerlambatRate) || 0;
+                pot = Number(emp.potTerlambatRate) || 0;
+            }else if(type === "cuti"){
+                pot = Number(emp.umRate) || 0;
             }else{
-                pot =
-                    dailyRate(emp);
+                pot = dailyRate(emp);
             }
         }
         // ==============================
@@ -3378,14 +3408,11 @@ function renderAdjustments(){
         // ==============================
         // LABEL JENIS
         // ==============================
-        const jenis =
-            type === "terlambat"
-            ? `<span class="tag">
-                Terlambat
-              </span>`
-            : `<span class="tag">
-                Alpha
-              </span>`;
+        const jenis = type === "terlambat"
+            ? `<span class="tag">Terlambat</span>`
+            : type === "cuti"
+                ? `<span class="tag">Cuti · Potong UM</span>`
+                : `<span class="tag">Alpha</span>`;
         return `
         <tr>
             <td>
@@ -3439,9 +3466,7 @@ async function addAdjustment(){
     }
     if(!eventDate){
         alert(
-            type === "terlambat"
-            ? "Pilih tanggal terlambat."
-            : "Pilih tanggal Alpha."
+            type === "terlambat" ? "Pilih tanggal terlambat." : type === "cuti" ? "Pilih tanggal cuti." : "Pilih tanggal Alpha."
         );
         return;
     }
@@ -3469,9 +3494,7 @@ async function addAdjustment(){
     });
     if(exists){
         alert(
-            type === "terlambat"
-            ? "Tanggal terlambat tersebut sudah dititipkan untuk periode potong tersebut."
-            : "Tanggal Alpha tersebut sudah dititipkan untuk periode potong tersebut."
+            type === "terlambat" ? "Tanggal terlambat tersebut sudah dititipkan untuk periode potong tersebut." : type === "cuti" ? "Tanggal cuti tersebut sudah dititipkan untuk periode potong tersebut." : "Tanggal Alpha tersebut sudah dititipkan untuk periode potong tersebut."
         );
         return;
     }
@@ -3479,9 +3502,7 @@ async function addAdjustment(){
     // LOADING
     // ==============================
     showLoading(
-        type === "terlambat"
-        ? "Menyimpan Titipan Terlambat..."
-        : "Menyimpan Titipan Alpha..."
+        type === "terlambat" ? "Menyimpan Titipan Terlambat..." : type === "cuti" ? "Menyimpan Titipan Cuti..." : "Menyimpan Titipan Alpha..."
     );
     try{
         // ==============================
@@ -3512,9 +3533,7 @@ async function addAdjustment(){
         // INFO
         // ==============================
         showToast(
-            type === "terlambat"
-            ? "Titipan terlambat berhasil disimpan."
-            : "Titipan Alpha berhasil disimpan."
+            type === "terlambat" ? "Titipan terlambat berhasil disimpan." : type === "cuti" ? "Titipan cuti berhasil disimpan. Uang makan pada tanggal tersebut dikurangi." : "Titipan Alpha berhasil disimpan."
         );
         // kosongkan keterangan
         document.getElementById("adjNote").value = "";
@@ -3601,16 +3620,18 @@ function exportRekapUMExcel(){
     ['REKAP UANG MAKAN & LEMBUR MINGGUAN'],
     ['Periode', BULAN_ID[state.month-1] + ' ' + state.year, 'UM' + (state.umPeriodIdx+1), p.start + ' - ' + p.end],
     [],
-    ['Nama','Bagian','Bank','No. Rekening','Jumlah Hari Uang Makan','Jumlah Jam Lembur','Jumlah Jam Lembur Hari Libur','Uang Makan','Lembur','Lembur Hari Libur','Total']
+    ['Nama','Bagian','Bank','No. Rekening','Jumlah Hari Uang Makan','Jumlah Jam Lembur','Jumlah Jam Lembur Hari Libur','Uang Makan Bersih','Pengurang UM (Titipan Cuti)','Lembur','Lembur Hari Libur','Total']
   ];
   let tu=0, tl=0, tlm=0, tt=0;
   employees.forEach(emp=>{
     const c=calcRange(emp,state.year,state.month,p.start,p.end);
+    const cutiUM=getCutiAdjustmentAmount(emp,state.year,state.month,p.start,p.end);
+    c.uangMakan=Math.max(0,Number(c.uangMakan||0)-cutiUM);
     const total=(Number(c.uangMakan)||0)+(Number(c.lemburBiasaRp)||0)+(Number(c.lemburMerahRp)||0);
     tu+=Number(c.uangMakan)||0; tl+=Number(c.lemburBiasaRp)||0; tlm+=Number(c.lemburMerahRp)||0; tt+=total;
-    rows.push([emp.name,emp.bagian,emp.bankName,emp.rekening,Number(c.cUM)||0,Number(c.jamLB)||0,Number(c.jamLM)||0,Number(c.uangMakan)||0,Number(c.lemburBiasaRp)||0,Number(c.lemburMerahRp)||0,total]);
+    rows.push([emp.name,emp.bagian,emp.bankName,emp.rekening,Number(c.cUM)||0,Number(c.jamLB)||0,Number(c.jamLM)||0,Number(c.uangMakan)||0,Number(cutiUM)||0,Number(c.lemburBiasaRp)||0,Number(c.lemburMerahRp)||0,total]);
   });
-  rows.push([],['TOTAL','','','','','','',tu,tl,tlm,tt]);
+  rows.push([],['TOTAL','','','','','','',tu,'-',tl,tlm,tt]);
   downloadExcelFile(rows,`Rekap_UM_Lembur_${state.year}_${String(state.month).padStart(2,'0')}_UM${state.umPeriodIdx+1}.xlsx`,'Rekap Mingguan');
 }
 function exportRekapPayrollExcel(){
