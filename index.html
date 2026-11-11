@@ -1282,6 +1282,7 @@ const RULES = [
 ];
 
 let employees = [];
+let dataReady = false; // true hanya setelah seluruh data utama berhasil dimuat dari Firestore
 let isSaving = false;
 let savePromise = null;
 let isDirty = false;
@@ -1342,19 +1343,30 @@ const SEED_EMPLOYEES = [
 /* ============================= DATABASE ============================= */
 
 async function loadData(){
+    // Jangan pernah menganggap kegagalan baca sebagai database kosong.
+    // Seed hanya boleh digunakan melalui proses inisialisasi manual yang disengaja.
+    dataReady = false;
 
-    employees = await loadEmployees();
+    const loadedEmployees = await loadEmployees();
+    const loadedAdjustments = await loadAdjustments();
 
-    adjustments = await loadAdjustments();
-
-    if(!employees || employees.length===0){
-
-        employees = structuredClone(SEED_EMPLOYEES);
-
-        await saveEmployees(employees);
-
+    if(!Array.isArray(loadedEmployees)){
+        throw new Error('Data karyawan dari Firestore tidak valid.');
+    }
+    if(!Array.isArray(loadedAdjustments)){
+        throw new Error('Data titipan dari Firestore tidak valid.');
     }
 
+    employees = loadedEmployees;
+    adjustments = loadedAdjustments;
+    dataReady = true;
+}
+
+function ensureDataReady(){
+    if(!dataReady){
+        showToast('Data belum berhasil dimuat dari Firebase. Penyimpanan diblokir untuk melindungi data.');
+        throw new Error('Operasi dibatalkan: data Firestore belum berhasil dimuat.');
+    }
 }
 
 function monthKey(year, month) {
@@ -1421,6 +1433,7 @@ let saveAttTimer = null;
 let saveTimer = null;
 
 function saveAttendance(y,m){
+    if(!dataReady){ isDirty=true; showToast('Data belum siap. Perubahan absensi tidak dikirim ke Firebase.'); return; }
     // Simpan otomatis ke Firebase setelah input berhenti berubah selama 400 ms.
     clearTimeout(saveAttTimer);
     clearTimeout(saveTimer);
@@ -1450,6 +1463,7 @@ function showLoading(){
 }
 
 async function saveCurrentTab(){
+    ensureDataReady();
 
     if(state.tab==="karyawan"){
 
@@ -1561,40 +1575,7 @@ async function renderActiveTab(){
     if(typeof renderCuti==='function') renderCuti();
   }
 }
-async function saveCurrentTab(){
 
-    if(state.tab==="karyawan"){
-
-        await saveEmployees(employees);
-
-    }
-
-    else if(state.tab==="absensi"){
-
-        const mk = monthKey(state.year,state.month);
-
-        await saveAttendanceData(
-            mk,
-            attendance[mk] || {}
-        );
-        if(cutiBalanceDirty){ await saveEmployees(employees); cutiBalanceDirty=false; }
-
-    }
-    else if(state.tab==="cuti"){
-        await saveEmployees(employees);
-        cutiBalanceDirty=false;
-    }
-
-    else if(state.tab==="lembur"){
-
-        // lembur sudah otomatis save
-        return;
-
-    }
-
-    isDirty=false;
-
-}
 /* ============================= HELPERS ============================= */
 function rupiah(n){
   n = Math.round(n||0);
@@ -2043,28 +2024,53 @@ document.getElementById('empModalSave').addEventListener('click', async ()=>{
     lemburBiasaRate: Number(document.getElementById('fLB').value||0),
     potTerlambatRate: Number(document.getElementById('fTerlambat').value||0),
   };
-  if(state.editingEmpId){
-    const emp = employees.find(e=>e.id===state.editingEmpId);
-    Object.assign(emp, data);
-  } else {
-    data.id = 'emp_'+Date.now();
-    employees.push(data);
+  try{
+    ensureDataReady();
+    const previousEmployees = structuredClone(employees);
+    if(state.editingEmpId){
+      const emp = employees.find(e=>e.id===state.editingEmpId);
+      if(!emp) throw new Error('Data karyawan yang akan diedit tidak ditemukan.');
+      Object.assign(emp, data);
+    } else {
+      data.id = 'emp_'+Date.now();
+      employees.push(data);
+    }
+    try{
+      await saveEmployees(employees);
+    }catch(err){
+      employees = previousEmployees;
+      throw err;
+    }
+    closeEmpModal();
+    renderKaryawan();
+    populateEmpSelects();
+    showToast('Data karyawan tersimpan');
+  }catch(err){
+    console.error('Gagal menyimpan data karyawan:',err);
+    showToast('Gagal menyimpan data karyawan. Data lokal dikembalikan; periksa koneksi Firebase.');
   }
-  await saveEmployees(employees);
-  closeEmpModal();
-  renderKaryawan();
-  populateEmpSelects();
-  showToast('Data karyawan tersimpan');
 });
 async function deleteEmp(id){
   const emp = employees.find(e=>e.id===id);
   if(!emp) return;
   if(!await showConfirmModal({title:'Hapus data karyawan?',message:'Data '+emp.name+' akan dihapus dari daftar karyawan. Data absensi terkait tidak akan otomatis terhapus.',confirmText:'Ya, hapus',icon:'🗑'})) return;
-  employees = employees.filter(e=>e.id!==id);
-  await saveEmployees(employees);
-  renderKaryawan();
-  populateEmpSelects();
-  showToast('Karyawan dihapus');
+  try{
+    ensureDataReady();
+    const previousEmployees = structuredClone(employees);
+    employees = employees.filter(e=>e.id!==id);
+    try{
+      await saveEmployees(employees);
+    }catch(err){
+      employees = previousEmployees;
+      throw err;
+    }
+    renderKaryawan();
+    populateEmpSelects();
+    showToast('Karyawan dihapus');
+  }catch(err){
+    console.error('Gagal menghapus karyawan:',err);
+    showToast('Gagal menghapus karyawan. Data lokal dikembalikan.');
+  }
 }
 
 /* ============================= ABSENSI TAB ============================= */
@@ -2165,6 +2171,7 @@ function openAbsPopup(day){
 function closeAbsPopup(){document.getElementById('absPopupBackdrop').classList.remove('open');}
 async function saveAbsPopup(){
   if(!state.absPopup) return;
+  try{ ensureDataReady(); }catch(err){ return; }
 
   const year = state.year;
   const month = state.month;
@@ -2199,6 +2206,7 @@ async function saveAbsPopup(){
 
 async function deleteAbsPopup(){
   if(!state.absPopup) return;
+  try{ ensureDataReady(); }catch(err){ return; }
 
   const year = state.year;
   const month = state.month;
@@ -2331,7 +2339,26 @@ document.getElementById('absPopupSave')?.addEventListener('click', saveAbsPopup)
 document.getElementById('absPopupDelete')?.addEventListener('click', deleteAbsPopup);
 document.getElementById('absPopupBackdrop')?.addEventListener('click', e=>{if(e.target.id==='absPopupBackdrop')closeAbsPopup();});
 document.getElementById('absMarkAllPresent')?.addEventListener('click', async ()=>{
-  if(!state.absEmpId)return; const dim=daysInMonth(state.year,state.month); for(let d=1;d<=dim;d++){if(new Date(state.year,state.month-1,d).getDay()!==0){const rec=getAttRec(state.year,state.month,state.absEmpId,d);applyCutiTransition(state.absEmpId,state.year,rec.kode||'','');rec.kode='';}} isDirty=true; await saveAttendanceData(monthKey(state.year,state.month),attendance[monthKey(state.year,state.month)]||{}); if(cutiBalanceDirty){await saveEmployees(employees);cutiBalanceDirty=false;} renderAbsensiCalendar();renderAbsensiTable();showToast('Semua hari kerja ditandai hadir.');
+  try{
+    ensureDataReady();
+    if(!state.absEmpId)return;
+    const dim=daysInMonth(state.year,state.month);
+    for(let d=1;d<=dim;d++){
+      if(new Date(state.year,state.month-1,d).getDay()!==0){
+        const rec=getAttRec(state.year,state.month,state.absEmpId,d);
+        applyCutiTransition(state.absEmpId,state.year,rec.kode||'','');
+        rec.kode='';
+      }
+    }
+    isDirty=true;
+    await saveAttendanceData(monthKey(state.year,state.month),attendance[monthKey(state.year,state.month)]||{});
+    if(cutiBalanceDirty){await saveEmployees(employees);cutiBalanceDirty=false;}
+    isDirty=false;
+    renderAbsensiCalendar();renderAbsensiTable();showToast('Semua hari kerja ditandai hadir.');
+  }catch(err){
+    console.error('Gagal menandai semua hari hadir:',err);
+    showToast('Gagal menyimpan perubahan absensi. Periksa koneksi lalu coba lagi.');
+  }
 });
 document.getElementById('absMarkWeekOff')?.addEventListener('click', ()=>showToast('Minggu sudah otomatis dianggap hari libur.'));
 document.getElementById('absApplyLeave')?.addEventListener('click', ()=>showToast('Untuk CT, klik tanggal pada kalender lalu pilih Cuti.'));
@@ -3450,6 +3477,7 @@ function renderAdjustments(){
     }).join("");
 }
 async function addAdjustment(){
+    try{ ensureDataReady(); }catch(err){ return; }
     const type = document.getElementById("adjType").value;
     const empId = document.getElementById("adjEmp").value;
     const eventDate = document.getElementById("adjDate").value;
@@ -3508,6 +3536,7 @@ async function addAdjustment(){
         // ==============================
         // SIMPAN DATA
         // ==============================
+        const previousAdjustments = structuredClone(adjustments);
         adjustments.push({
             id: "adj_" + Date.now(),
             type: type,
@@ -3523,7 +3552,12 @@ async function addAdjustment(){
         // ==============================
         // SAVE FIREBASE
         // ==============================
-        await saveAdjustments(adjustments);
+        try{
+            await saveAdjustments(adjustments);
+        }catch(saveError){
+            adjustments = previousAdjustments;
+            throw saveError;
+        }
         // ==============================
         // REFRESH DATA
         // ==============================
@@ -3551,28 +3585,49 @@ async function addAdjustment(){
 }
 async function deleteAdjustment(id){
     if(!await showConfirmModal({title:'Hapus titipan potongan?',message:'Data titipan yang dipilih akan dihapus. Tindakan ini tidak dapat dibatalkan.',confirmText:'Ya, hapus',icon:'🗑'})) return;
-    showLoading("Menghapus Titipan...");
-    adjustments = adjustments.filter(a=>a.id!==id);
-    await saveAdjustments(adjustments);
-    hideLoading();
-    renderAdjustments();
-    showToast("Titipan berhasil dihapus.");
-
+    try{
+        ensureDataReady();
+        showLoading();
+        const previousAdjustments = structuredClone(adjustments);
+        adjustments = adjustments.filter(a=>a.id!==id);
+        try{
+            await saveAdjustments(adjustments);
+        }catch(err){
+            adjustments = previousAdjustments;
+            throw err;
+        }
+        renderAdjustments();
+        showToast("Titipan berhasil dihapus.");
+    }catch(err){
+        console.error('Gagal menghapus titipan:',err);
+        showToast('Gagal menghapus titipan. Data lokal dikembalikan.');
+    }finally{
+        hideLoading();
+    }
 }
 /* ============================= INIT ============================= */
 document.addEventListener("DOMContentLoaded", async () => {
+    showLoading();
+    try{
+        // Tunggu database.js selesai dimuat.
+        while (typeof window.loadEmployees !== "function") {
+            await new Promise(resolve => setTimeout(resolve, 50));
+        }
 
-    // Tunggu database.js selesai dimuat
-    while (typeof window.loadEmployees !== "function") {
-        await new Promise(resolve => setTimeout(resolve, 50));
+        await loadData();
+        await loadAttendance(state.year, state.month);
+        populateEmpSelects();
+        populateAdjustmentSelect();
+        renderKaryawan();
+        renderReadme();
+        showToast('Data berhasil dimuat dari Firebase.');
+    }catch(err){
+        dataReady = false;
+        console.error('Inisialisasi aplikasi gagal:',err);
+        showToast('Gagal memuat data Firebase. Penyimpanan dinonaktifkan untuk melindungi data. Muat ulang setelah koneksi diperiksa.');
+    }finally{
+        hideLoading();
     }
-    await loadData();
-    await loadAttendance(state.year, state.month);
-    populateEmpSelects();
-    populateAdjustmentSelect();
-    renderKaryawan();
-    renderReadme();
-
 });
 
 document.addEventListener('DOMContentLoaded',()=>{
@@ -3803,6 +3858,7 @@ document.addEventListener("keydown", e=>{
 
 async function saveAndLogout(){
     if(isSaving) return;
+    try{ ensureDataReady(); }catch(err){ return; }
     isSaving = true;
     btnConfirmLogout.disabled = true;
     btnCancelLogout.disabled = true;
@@ -3905,6 +3961,7 @@ if(btnSaveAll){
             console.error(err);
 
             btnSaveAll.innerHTML = "❌ GAGAL";
+            showToast("Penyimpanan gagal. Data tidak ditandai tersimpan.");
 
         }
 
